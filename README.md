@@ -1,0 +1,2 @@
+This is a simple tool to compare directories. It allows the user to select different filters and displays changes whether different files are present.
+It also displays useful details, about the number of files and subdirectories found.
