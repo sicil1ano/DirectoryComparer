@@ -17,7 +17,7 @@
         </ComboBox.ItemTemplate>
         </ComboBox>
             <Label Content="File Filter:" Height="28" HorizontalAlignment="Left" Margin="301,12,0,0" Name="label1" VerticalAlignment="Top" Width="59" FontFamily="Tahoma" />
-        <DataGrid AutoGenerateColumns="False" Height="200" HorizontalAlignment="Left" Margin="9,155,0,0" Name="firstDataGrid" VerticalAlignment="Top" Width="362" ItemsSource="{Binding}" IsReadOnly="True" HorizontalGridLinesBrush="#00000000" FontFamily="Tahoma" ScrollViewer.ScrollChanged="firstDataGrid_ScrollChanged" LoadingRow="firstDataGrid_LoadingRow" EnableColumnVirtualization="True" EnableRowVirtualization="True" MouseDoubleClick="firstDataGrid_MouseDoubleClick">
+        <DataGrid AutoGenerateColumns="False" Height="200" HorizontalAlignment="Left" Margin="9,155,0,0" Name="firstDataGrid" VerticalAlignment="Top" Width="362" ItemsSource="{Binding}" IsReadOnly="True" HorizontalGridLinesBrush="#00000000" FontFamily="Tahoma" ScrollViewer.ScrollChanged="firstDataGrid_ScrollChanged" LoadingRow="firstDataGrid_LoadingRow" EnableColumnVirtualization="True" EnableRowVirtualization="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="380"/>
                 <DataGridTextColumn Header="Creation Date" Binding="{Binding CreatedDate}"/>
