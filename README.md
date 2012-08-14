@@ -1,6 +1,6 @@
 Directory Comparer - Version 0.1
 
-It represents my first work with WPF. So, if you find something that it could be improved, that's because I have to learn more.
+It represents my first work with WPF. So, if you find something that it could be improved, that's because I have to learn more about .NET.
 After all, Rome wasn't built in a day. :P
 
 Description:
