@@ -53,7 +53,8 @@ namespace CompareDirectories
 
         static List<Info> listDiff;
 
-        
+        private string SelectedPath1 { get; set; }
+        private string SelectedPath2 { get; set; }
         
         private string path1 ="";
         private string path2 = "";
@@ -162,18 +163,38 @@ namespace CompareDirectories
         }
 
         private void browseButton1_Click(object sender, RoutedEventArgs e)
-        {
+            {
             var dialog = new FolderBrowserDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
-                path1 = dialog.SelectedPath;
-                //initializingWorker1();
-                worker1.RunWorkerAsync(path1);
-                //scanForFiles1(dialog.SelectedPath);
-                folder1TextBox.Text = dialog.SelectedPath;
-                //path1 = dialog.SelectedPath;
-                
+                if (path1.Length == 0 || !path1.Equals(dialog.SelectedPath))
+                {
+                    path1 = dialog.SelectedPath;
+                    //initializingWorker1();
+                    worker1.RunWorkerAsync(path1);
+                    SelectedPath1 = dialog.SelectedPath;
+                    //System.Threading.Thread.Sleep(250);
+                    //scanForFiles1(dialog.SelectedPath);
+                    /*try
+                    {
+                        bool busy = worker1.IsBusy;
+                        while (busy)
+                        {
+
+
+                            busy = worker1.IsBusy;
+                            //System.Threading.Thread.Sleep(500);
+                        }
+                        
+                        //path1 = dialog.SelectedPath;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message.ToString());
+                        Console.WriteLine(ex.InnerException.ToString());
+                    }*/
+                }
             }
         }
 
@@ -183,20 +204,39 @@ namespace CompareDirectories
             DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
-               path2 = dialog.SelectedPath;
-               //scanForFiles2(dialog.SelectedPath);
-               worker2.RunWorkerAsync(path2);
-               folder2TextBox.Text = dialog.SelectedPath;
-               
-               
+                if (path2.Length == 0 || !path2.Equals(dialog.SelectedPath))
+                {
+                    path2 = dialog.SelectedPath;
+                    //scanForFiles2(dialog.SelectedPath);
+                    worker2.RunWorkerAsync(path2);
+                    SelectedPath2 = dialog.SelectedPath;
+                    /*try
+                    {
+                        bool busy = worker2.IsBusy;
+                        while (busy)
+                        {
+
+
+                            busy = worker2.IsBusy;
+                            System.Threading.Thread.Sleep(500);
+                        }
+                        folder2TextBox.Text = dialog.SelectedPath;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message.ToString());
+                        Console.WriteLine(ex.InnerException.ToString());
+                    }*/
+                }
             }
         }
 
         /* method to scan the first directory */
 
         private void scanForFiles1(string path) {
-            
-            
+
+            FilesFound1 = 0;
+            SubDirectoriesFound1 = 0;
             filesList1.Clear();
             
            
@@ -258,12 +298,15 @@ namespace CompareDirectories
         {
             filesFound1TextBox.Text = FilesFound1.ToString();
             subdirectories1FoundTextBox.Text = SubDirectoriesFound1.ToString();
+            folder1TextBox.Text = SelectedPath1;
         }
 
         /* method to scan the second directory */
 
         private void scanForFiles2(string path)
         {
+            FilesFound2 = 0;
+            SubDirectoriesFound2 = 0;
             filesList2.Clear();
 
             
@@ -323,8 +366,10 @@ namespace CompareDirectories
 
         private void updateFileDirCounters2()
         {
+            
             filesFound2TextBox.Text = FilesFound2.ToString();
             subdirectoriesFound2TextBox.Text = SubDirectoriesFound2.ToString();
+            folder2TextBox.Text = SelectedPath2;
         }
 
         /* method to set the filters available in the filter dropdown */
@@ -522,6 +567,7 @@ namespace CompareDirectories
             {
                 
                 bool checkLists = listDiff.Count == 0;
+                //bool checkLists = filesList1.SequenceEqual(filesList2);
                 if (checkLists)
                 {
                     resultOfComparingTextBlock.Text = "Equal Folders!";
@@ -605,6 +651,8 @@ namespace CompareDirectories
 
         private void showDiffTwoCollections()
         {
+            if(listDiff != null) 
+                listDiff.Clear();
            listDiff = filesList1.Where(x => !filesList2.Any(x1 => x1.Name == x.Name))
                 .Union(filesList2.Where(x => !filesList1.Any(x1 => x1.Name == x.Name))).ToList<CompareDirectories.Info>();
 
