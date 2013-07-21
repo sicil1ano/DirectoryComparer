@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.IO;
 using System.ComponentModel;
-using System.Data;
 using System.Windows.Threading;
 
 namespace CompareDirectories
@@ -48,10 +41,10 @@ namespace CompareDirectories
                 return fileFilterDropDown.SelectedValue.ToString();
             }
         }
-        static List<Info> filesList1;
-        static List<Info> filesList2;
+        static List<DataItem> filesList1;
+        static List<DataItem> filesList2;
 
-        static List<Info> listDiff;
+        static List<DataItem> listDiff;
 
         private string SelectedPath1 { get; set; }
         private string SelectedPath2 { get; set; }
@@ -61,6 +54,8 @@ namespace CompareDirectories
         private bool RecursiveScan1 { get; set; }
         private bool RecursiveScan2 { get; set; }
         private bool RecursiveScanCheck { get; set; }
+
+        public MainViewModel MainViewModel { get; set; }
         
         private string FilterChosen
         {
@@ -96,71 +91,65 @@ namespace CompareDirectories
         public MainWindow()
         {
             InitializeComponent();
+            MainViewModel = new CompareDirectories.MainViewModel(this);
             comboBoxFilters();
-            
+            this.DataContext = MainViewModel;
+            secondDataGrid.ItemsSource = MainViewModel.ViewModelSecondDatagrid.DirectoryItems;
             FilterChosen = "*.*";
-            filesList1 = new List<Info>();
-            filesList2 = new List<Info>();
-            worker1.DoWork += new DoWorkEventHandler(worker1_DoWork);
-            worker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker1_RunWorkerCompleted);
-            worker2.DoWork += new DoWorkEventHandler(worker2_DoWork);
-            worker2.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker2_RunWorkerCompleted);
-            workerRecursive.DoWork += new DoWorkEventHandler(workerRecursive_DoWork);
-            workerRecursive.RunWorkerCompleted += new RunWorkerCompletedEventHandler(workerRecursive_RunWorkerCompleted);
         }
 
-        void workerRecursive_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate()
-            {
-                updateDatagrids();
-                firstDataGrid.Items.Refresh();
-                secondDataGrid.Items.Refresh();
-                System.Threading.Thread.Sleep(100);
-            }));
+        //void workerRecursive_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        //{
+        //    this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate()
+        //    {
+        //        updateDatagrids();
+        //        firstDataGrid.Items.Refresh();
+        //        secondDataGrid.Items.Refresh();
+        //        System.Threading.Thread.Sleep(100);
+        //    }));
 
             
-        }
+        //}
 
-        void workerRecursive_DoWork(object sender, DoWorkEventArgs e)
-        {
-            worker1.RunWorkerAsync(path1);
+        //void workerRecursive_DoWork(object sender, DoWorkEventArgs e)
+        //{
+        //    worker1.RunWorkerAsync(path1);
             
-            worker2.RunWorkerAsync(path2);
-            System.Threading.Thread.Sleep(250);
-        }
+        //    worker2.RunWorkerAsync(path2);
+        //    System.Threading.Thread.Sleep(250);
+        //}
 
-        void worker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            this.Dispatcher.Invoke(DispatcherPriority.Render, new Action(delegate()
-                {
-                    updateSecondDatagrid();
-                    updateFileDirCounters2();
-                }));
-            System.Threading.Thread.Sleep(100);
+        //void worker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        //{
+        //    this.Dispatcher.Invoke(DispatcherPriority.Render, new Action(delegate()
+        //        {
+        //            updateSecondDatagrid();
+        //            updateFileDirCounters2();
+        //        }));
+        //    System.Threading.Thread.Sleep(100);
             
-        }
+        //}
 
-        void worker2_DoWork(object sender, DoWorkEventArgs e)
-        {
-            scanForFiles2(path2);
-        }
+        //void worker2_DoWork(object sender, DoWorkEventArgs e)
+        //{
+        //    scanForFiles2(path2);
+        //}
 
-        void worker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
+        //void worker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        //{
             
-            this.Dispatcher.Invoke(DispatcherPriority.Render, new Action(delegate()
-            {
-                updateFirstDatagrid();
-                updateFileDirCounters1();
-            }));
-            System.Threading.Thread.Sleep(100);
-        }
+        //    this.Dispatcher.Invoke(DispatcherPriority.Render, new Action(delegate()
+        //    {
+        //        updateFirstDatagrid();
+        //        updateFileDirCounters1();
+        //    }));
+        //    System.Threading.Thread.Sleep(100);
+        //}
 
-        void worker1_DoWork(object sender, DoWorkEventArgs e)
-        {
-            scanForFiles1(path1);
-        }
+        //void worker1_DoWork(object sender, DoWorkEventArgs e)
+        //{
+        //    scanForFiles1(path1);
+        //}
 
         private void browseButton1_Click(object sender, RoutedEventArgs e)
             {
@@ -171,29 +160,24 @@ namespace CompareDirectories
                 if (path1.Length == 0 || !path1.Equals(dialog.SelectedPath))
                 {
                     path1 = dialog.SelectedPath;
-                    //initializingWorker1();
-                    worker1.RunWorkerAsync(path1);
+                    FilesFound1 = 0;
+                    SubDirectoriesFound1 = 0;
+                    filesList1.Clear();
+                    //worker1.RunWorkerAsync(path1);
                     SelectedPath1 = dialog.SelectedPath;
-                    //System.Threading.Thread.Sleep(250);
-                    //scanForFiles1(dialog.SelectedPath);
-                    /*try
-                    {
-                        bool busy = worker1.IsBusy;
-                        while (busy)
-                        {
 
+                    IOUtilities.SearchFilesAndDirectories(SelectedPath1);
+                    filesList1 = IOUtilities.FilesAndDirectoriesList;
+                    FilesFound1 = IOUtilities.FilesFoundNumber;
+                    SubDirectoriesFound1 = IOUtilities.SubDirectoriesFoundNumber;
+                    
 
-                            busy = worker1.IsBusy;
-                            //System.Threading.Thread.Sleep(500);
-                        }
-                        
-                        //path1 = dialog.SelectedPath;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message.ToString());
-                        Console.WriteLine(ex.InnerException.ToString());
-                    }*/
+                    firstDataGrid.ItemsSource = filesList1;
+                    firstDataGrid.Items.Refresh();
+                    //IOUtilities.ClearParameters(); //è perche uso static..dopo il refactoring qui dovrebbe essere tutto ok.
+                    filesFound1TextBox.Text = FilesFound1.ToString();
+                    subdirectories1FoundTextBox.Text = SubDirectoriesFound1.ToString();
+                    folder1TextBox.Text = SelectedPath1;
                 }
             }
         }
@@ -206,92 +190,67 @@ namespace CompareDirectories
             {
                 if (path2.Length == 0 || !path2.Equals(dialog.SelectedPath))
                 {
-                    path2 = dialog.SelectedPath;
-                    //scanForFiles2(dialog.SelectedPath);
-                    worker2.RunWorkerAsync(path2);
-                    SelectedPath2 = dialog.SelectedPath;
-                    /*try
-                    {
-                        bool busy = worker2.IsBusy;
-                        while (busy)
-                        {
-
-
-                            busy = worker2.IsBusy;
-                            System.Threading.Thread.Sleep(500);
-                        }
-                        folder2TextBox.Text = dialog.SelectedPath;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message.ToString());
-                        Console.WriteLine(ex.InnerException.ToString());
-                    }*/
+                    MainViewModel.PathSecondDir = dialog.SelectedPath;
+                    MainViewModel.GetFilesAndDirectories(2, MainViewModel.PathSecondDir);
+                    //secondDataGrid.Items.Refresh();
                 }
             }
         }
 
         /* method to scan the first directory */
 
-        private void scanForFiles1(string path) {
-
-            FilesFound1 = 0;
-            SubDirectoriesFound1 = 0;
-            filesList1.Clear();
-            
-           
-            
+        private void scanForFiles1(string path) 
+        {
             int filesFound = 0;
             int subDirectoriesFound = 0;
             var dirInfo = new System.IO.DirectoryInfo(path);
-          
-                if (RecursiveScanCheck)
-                {
-                   int fileRecFound = 0;
-                    int subDirRecFound = 0;
-                    foreach (var file in dirInfo.GetFiles(FilterChosen, System.IO.SearchOption.TopDirectoryOnly))
-                    {
-                        if (file != null)
-                        {
-                            filesList1.Add(new Info()
-                            {
-                                SubFolder = false,
-                                Name = file.Name,
-                                Path = file.FullName,
-                                CreatedDate = file.CreationTimeUtc,
-                                ModifiedDate = file.LastWriteTimeUtc
-                            });
-                            filesFound++;
-                        }
-                        
-                    }
 
-                    recursiveSearch1(path, out fileRecFound, out subDirRecFound);
-                    filesFound = filesFound + fileRecFound;
-                    subDirectoriesFound = subDirectoriesFound + subDirRecFound;
-                                        
-                   
-                }
-                else
-                { 
-                    foreach (var file in dirInfo.GetFiles(FilterChosen, System.IO.SearchOption.TopDirectoryOnly))
+            if (RecursiveScanCheck)
+            {
+                int fileRecFound = 0;
+                int subDirRecFound = 0;
+                foreach (var file in dirInfo.EnumerateFiles())
+                {
+                    if (file != null)
                     {
-                        filesList1.Add(new Info()
+                        filesList1.Add(new DataItem()
                         {
-                            SubFolder = false,
-                            Name = file.Name,
-                            Path = file.FullName,
-                            CreatedDate = file.CreationTimeUtc,
-                            ModifiedDate = file.LastWriteTimeUtc
+                            IsSubFolder = false,
+                            ItemName = file.Name,
+                            ItemPath = dirInfo.Name,
+                            ItemCreatedDate = file.CreationTimeUtc,
+                            ItemModifiedDate = file.LastWriteTimeUtc
                         });
                         filesFound++;
-                      
                     }
-                    
+
                 }
+
+                foreach (var dir in dirInfo.EnumerateDirectories())
+                {
+                    scanForFiles1(dir.FullName);
+                }
+            }
+            else
+            {
+                foreach (var file in dirInfo.GetFiles(FilterChosen, System.IO.SearchOption.TopDirectoryOnly))
+                {
+                    filesList1.Add(new DataItem()
+                    {
+                        IsSubFolder = false,
+                        ItemName = file.Name,
+                        ItemPath = file.FullName,
+                        ItemCreatedDate = file.CreationTimeUtc,
+                        ItemModifiedDate = file.LastWriteTimeUtc
+                    });
+                    filesFound++;
+
+                }
+
+            }
           
-            FilesFound1 = filesFound;
-            SubDirectoriesFound1 = subDirectoriesFound;
+            FilesFound1 += filesFound;
+            SubDirectoriesFound1 += subDirectoriesFound;
         }
 
         private void updateFileDirCounters1()
@@ -320,13 +279,13 @@ namespace CompareDirectories
                     int subDirRecFound = 0;
                     foreach (var file in dirInfo.GetFiles(FilterChosen, System.IO.SearchOption.TopDirectoryOnly))
                     {
-                        filesList2.Add(new Info()
+                        filesList2.Add(new DataItem()
                         {
-                            SubFolder = false,
-                            Name = file.Name,
-                            Path = file.FullName,
-                            CreatedDate = file.CreationTimeUtc,
-                            ModifiedDate = file.LastWriteTimeUtc
+                            IsSubFolder = false,
+                            ItemName = file.Name,
+                            ItemPath = file.FullName,
+                            ItemCreatedDate = file.CreationTimeUtc,
+                            ItemModifiedDate = file.LastWriteTimeUtc
                         });
                         filesFound++;
                        
@@ -343,13 +302,13 @@ namespace CompareDirectories
                 {
                     foreach (var file in dirInfo.GetFiles(FilterChosen, System.IO.SearchOption.TopDirectoryOnly))
                     {
-                        filesList2.Add(new Info()
+                        filesList2.Add(new DataItem()
                         {
-                            SubFolder = false,
-                            Name = file.Name,
-                            Path = file.FullName,
-                            CreatedDate = file.CreationTimeUtc,
-                            ModifiedDate = file.LastWriteTimeUtc
+                            IsSubFolder = false,
+                            ItemName = file.Name,
+                            ItemPath = file.FullName,
+                            ItemCreatedDate = file.CreationTimeUtc,
+                            ItemModifiedDate = file.LastWriteTimeUtc
                         });
                         filesFound++;
                         
@@ -375,12 +334,6 @@ namespace CompareDirectories
         /* method to set the filters available in the filter dropdown */
 
         private void comboBoxFilters() {
-           /* fileFilterDropDown.Items.Add("*.*");
-            fileFilterDropDown.Items.Add("*.config");
-            fileFilterDropDown.Items.Add("*.dll");
-            fileFilterDropDown.Items.Add("*.exe");*/
-
-
             List<Filter> filtersList = new List<Filter>();
             string[] array = new string[] { "*.*", "*.pdf", "*.txt", "*.config", "*.dll", "*.zip","*.rar","*.exe" };
             foreach(string filter in array){
@@ -408,13 +361,13 @@ namespace CompareDirectories
             if (folder1TextBox.Text.Length != 0)
             {
                 
-                worker1.RunWorkerAsync(folder1TextBox.Text);
+                //worker1.RunWorkerAsync(folder1TextBox.Text);
                 firstDataGrid.Items.Refresh();
             }
             if (folder2TextBox.Text.Length != 0)
             {
                 
-                worker2.RunWorkerAsync(folder1TextBox.Text);
+                //worker2.RunWorkerAsync(folder1TextBox.Text);
                 secondDataGrid.Items.Refresh();
             }
         }
@@ -441,36 +394,38 @@ namespace CompareDirectories
                     continue;
                 else
                 {
-                    foreach (var file in dir.GetFiles(FilterChosen, SearchOption.TopDirectoryOnly))
-                    {
-                        filesList1.Add(new Info()
-                        {
-                            SubFolder = true,
-                            Name = "."+@"\"+dir.Name + @"\" + file.Name,
-                            Path = file.FullName,
-                            CreatedDate = file.CreationTimeUtc,
-                            ModifiedDate = file.LastWriteTimeUtc
-                        });
-                        filesFound++;
-                    }
-                    subDirFound++;
+                    scanForFiles1(dir.FullName);
+                    
+                    //foreach (var file in dir.GetFiles(FilterChosen, SearchOption.TopDirectoryOnly))
+                    //{
+                    //    filesList1.Add(new DataItem()
+                    //    {
+                    //        IsSubFolder = true,
+                    //        ItemName = "."+@"\"+dir.Name + @"\" + file.Name,
+                    //        ItemPath = file.FullName,
+                    //        ItemCreatedDate = file.CreationTimeUtc,
+                    //        ItemModifiedDate = file.LastWriteTimeUtc
+                    //    });
+                    //    filesFound++;
+                    //}
+                    //subDirFound++;
 
-                    foreach (var subDir in dir.GetDirectories())
-                    {
-                        foreach (var file in subDir.GetFiles(FilterChosen, SearchOption.TopDirectoryOnly))
-                        {
-                            filesList1.Add(new Info()
-                            {
-                                SubFolder = true,
-                                Name = "."+file.FullName.Replace(path, ""),
-                                Path = file.FullName,
-                                CreatedDate = file.CreationTimeUtc,
-                                ModifiedDate = file.LastWriteTimeUtc
-                            });
-                            filesFound++;
-                        }
-                        subDirFound++;
-                    }
+                    //foreach (var subDir in dir.GetDirectories())
+                    //{
+                    //    foreach (var file in subDir.GetFiles(FilterChosen, SearchOption.TopDirectoryOnly))
+                    //    {
+                    //        filesList1.Add(new DataItem()
+                    //        {
+                    //            IsSubFolder = true,
+                    //            ItemName = "."+file.FullName.Replace(path, ""),
+                    //            ItemPath = file.FullName,
+                    //            ItemCreatedDate = file.CreationTimeUtc,
+                    //            ItemModifiedDate = file.LastWriteTimeUtc
+                    //        });
+                    //        filesFound++;
+                    //    }
+                    //    subDirFound++;
+                    //}
                     
                 }
             }
@@ -491,13 +446,13 @@ namespace CompareDirectories
                 {
                     foreach (var file in dir.GetFiles(FilterChosen, SearchOption.TopDirectoryOnly))
                     {
-                        filesList2.Add(new Info()
+                        filesList2.Add(new DataItem()
                         {
-                            SubFolder = true,
-                            Name = "." + @"\" + dir.Name + @"\" + file.Name,
-                            Path = file.FullName,
-                            CreatedDate = file.CreationTimeUtc,
-                            ModifiedDate = file.LastWriteTimeUtc
+                            IsSubFolder = true,
+                            ItemName = "." + @"\" + dir.Name + @"\" + file.Name,
+                            ItemPath = file.FullName,
+                            ItemCreatedDate = file.CreationTimeUtc,
+                            ItemModifiedDate = file.LastWriteTimeUtc
                         });
                         filesFound++;
                     }
@@ -507,13 +462,13 @@ namespace CompareDirectories
                     {
                         foreach (var file in subDir.GetFiles(FilterChosen, SearchOption.TopDirectoryOnly))
                         {
-                            filesList2.Add(new Info()
+                            filesList2.Add(new DataItem()
                             {
-                                SubFolder = true,
-                                Name = "." + file.FullName.Replace(path, ""),
-                                Path = file.FullName,
-                                CreatedDate = file.CreationTimeUtc,
-                                ModifiedDate = file.LastWriteTimeUtc
+                                IsSubFolder = true,
+                                ItemName = "." + file.FullName.Replace(path, ""),
+                                ItemPath = file.FullName,
+                                ItemCreatedDate = file.CreationTimeUtc,
+                                ItemModifiedDate = file.LastWriteTimeUtc
                             });
                             filesFound++;
                         }
@@ -653,8 +608,8 @@ namespace CompareDirectories
         {
             if(listDiff != null) 
                 listDiff.Clear();
-           listDiff = filesList1.Where(x => !filesList2.Any(x1 => x1.Name == x.Name))
-                .Union(filesList2.Where(x => !filesList1.Any(x1 => x1.Name == x.Name))).ToList<CompareDirectories.Info>();
+           listDiff = filesList1.Where(x => !filesList2.Any(x1 => x1.ItemName == x.ItemName))
+                .Union(filesList2.Where(x => !filesList1.Any(x1 => x1.ItemName == x.ItemName))).ToList<CompareDirectories.DataItem>();
 
           
         }
@@ -666,18 +621,18 @@ namespace CompareDirectories
             {
                
 
-                Info rowDataContext = e.Row.DataContext as Info;
+                DataItem rowDataContext = e.Row.DataContext as DataItem;
 
                 if (rowDataContext != null)
                 {
                     
-                    string rowItemName = rowDataContext.Name;
+                    string rowItemName = rowDataContext.ItemName;
                     
                     if (listDiff != null)
                     {
                         foreach (var element in listDiff)
                         {
-                            if (rowItemName.Equals(element.Name))
+                            if (rowItemName.Equals(element.ItemName))
                             {
                                 e.Row.Foreground = new SolidColorBrush(Colors.White);
                                 e.Row.Background = new SolidColorBrush(Colors.DarkRed);
@@ -700,18 +655,18 @@ namespace CompareDirectories
             {
                 
                 DataGridRow item = e.Row;
-                var c = item.DataContext as Info;
+                var c = item.DataContext as DataItem;
 
                 if (c != null)
                 {
-                    string row = c.Name;
+                    string row = c.ItemName;
 
                     
                     if (listDiff != null)
                     {
                         foreach (var element in listDiff)
                         {
-                            if (row == element.Name)
+                            if (row == element.ItemName)
                             {
                                 e.Row.Foreground = new SolidColorBrush(Colors.White);
                                 e.Row.Background = new SolidColorBrush(Colors.DarkRed);
@@ -735,7 +690,7 @@ namespace CompareDirectories
         {
             //showDiffTwoCollections();
             firstDataGrid.ItemsSource = filesList1;
-            firstDataGrid.DataContext = filesList1;
+            //firstDataGrid.DataContext = filesList1;
             firstDataGrid.Items.Refresh();
         }
 
@@ -754,12 +709,12 @@ namespace CompareDirectories
                 RecursiveScanCheck = true;
                 if (path1.Length != 0 && path2.Length != 0)
                 {
-                    workerRecursive.RunWorkerAsync();
+                    //workerRecursive.RunWorkerAsync();
                    
-                    if (!workerRecursive.IsBusy)
-                    {
-                        checkIfFoldersAreEqual();
-                    }
+                    //if (!workerRecursive.IsBusy)
+                    //{
+                    //    checkIfFoldersAreEqual();
+                    //}
                     
                 }
             }
@@ -772,13 +727,13 @@ namespace CompareDirectories
             RecursiveScanCheck = false;
                 if (path1.Length != 0 && path2.Length != 0)
                 {
-                   workerRecursive.RunWorkerAsync();
-                   if (!workerRecursive.IsBusy)
-                   {
-                       System.Threading.Thread.Sleep(500);
+                   //workerRecursive.RunWorkerAsync();
+                   //if (!workerRecursive.IsBusy)
+                   //{
+                   //    System.Threading.Thread.Sleep(500);
                        
-                       checkIfFoldersAreEqual();
-                   }
+                   //    checkIfFoldersAreEqual();
+                   //}
                     
                 }
             }
