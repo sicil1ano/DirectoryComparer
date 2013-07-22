@@ -24,7 +24,7 @@
                 <DataGridTextColumn Header="Last Edit Date" Binding="{Binding ItemModifiedDate}"/>
             </DataGrid.Columns>
         </DataGrid>
-        <DataGrid AutoGenerateColumns="False" Height="200" HorizontalAlignment="Right" Margin="0,155,6,0" Name="secondDataGrid" VerticalAlignment="Top" Width="384"  IsReadOnly="True" FontFamily="Tahoma" HorizontalGridLinesBrush="#00000000" ScrollViewer.ScrollChanged="secondDataGrid_ScrollChanged" LoadingRow="secondDataGrid_LoadingRow">
+        <DataGrid AutoGenerateColumns="False" Height="200" HorizontalAlignment="Right" Margin="0,155,6,0" Name="secondDataGrid" ItemsSource="{Binding ViewModelSecondDatagrid.DirectoryItems}" VerticalAlignment="Top" Width="384"  IsReadOnly="True" FontFamily="Tahoma" HorizontalGridLinesBrush="#00000000" ScrollViewer.ScrollChanged="secondDataGrid_ScrollChanged" LoadingRow="secondDataGrid_LoadingRow">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding ItemName}" Width="380"/>
                 <DataGridTextColumn Header="Creation Date" Binding="{Binding ItemCreatedDate}"/>

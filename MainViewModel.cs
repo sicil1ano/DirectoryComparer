@@ -12,6 +12,7 @@ namespace CompareDirectories
         private bool _recursiveScan;
         private string _pathFirstDir;
         private string _pathSecondDir;
+        //private delegate void Do();
 
         #endregion
 
@@ -27,7 +28,7 @@ namespace CompareDirectories
         /// </summary>
         public ViewModelDG2 ViewModelSecondDatagrid { get; set; }
 
-        public MainWindow MainWindow { get; set; }
+        public IOUtilities IOUtilities { get; set; }
 
         //è meglio considerare un enum per i filtri? Occhio alla property GetFilter di main window..
         public string FilterChosen { get; set; }
@@ -42,16 +43,13 @@ namespace CompareDirectories
                 return _recursiveScan;
             }
 
-            set 
+            set
             {
                 if (value != _recursiveScan)
                 {
                     _recursiveScan = value;
                     OnPropertyChanged("RecursiveScan");
-                    if (RecursiveScan)
-                    {
-                        GetFilesAndDirectoriesDatagrids();
-                    }
+                    GetFilesAndDirectoriesDatagrids();
                 }
             }
         }
@@ -63,12 +61,21 @@ namespace CompareDirectories
                 GetFilesAndDirectories(1, PathFirstDir);
                 GetFilesAndDirectories(2, PathSecondDir);
             }
+            else if ((!String.IsNullOrEmpty(PathFirstDir)))
+            {
+                GetFilesAndDirectories(1, PathFirstDir);
+            }
+
+            else if ((!String.IsNullOrEmpty(PathSecondDir)))
+            {
+                GetFilesAndDirectories(2, PathSecondDir);
+            }
         }
 
         /// <summary>
         /// Gets/Sets the path of the first directory to compare.
         /// </summary>
-        public string PathFirstDir 
+        public string PathFirstDir
         {
             get
             {
@@ -110,12 +117,13 @@ namespace CompareDirectories
         /// <summary>
         /// Main Constructor.
         /// </summary>
-        public MainViewModel(MainWindow mainWindow)
+        public MainViewModel()
         {
             ViewModelFirstDatagrid = new ViewModelDG1(this);
             ViewModelSecondDatagrid = new ViewModelDG2(this);
-            IOUtilities.MainViewModel = this;
-            MainWindow = mainWindow;
+            IOUtilities = new IOUtilities(this);
+            PathFirstDir = String.Empty;
+            PathSecondDir = String.Empty;
         }
 
         /// <summary>
@@ -125,24 +133,32 @@ namespace CompareDirectories
         /// <param name="directoryPath">The path of directory in which we want to search.</param>
         public void GetFilesAndDirectories(int datagridNumber, string directoryPath)
         {
+            int filesNumber = 0;
+            int subDirectoriesNumber = 0;
             if (datagridNumber == 1)
             {
-                IOUtilities.ClearParameters();
-                IOUtilities.SearchFilesAndDirectories(directoryPath);
-                ViewModelFirstDatagrid.DirectoryItems = IOUtilities.FilesAndDirectoriesList;
-                ViewModelFirstDatagrid.FilesNumber = IOUtilities.FilesFoundNumber;
-                ViewModelFirstDatagrid.SubDirectoriesNumber = IOUtilities.SubDirectoriesFoundNumber;
-                IOUtilities.ClearParameters();
+                ViewModelFirstDatagrid.DirectoryItems = IOUtilities.GetDirectoryElements(directoryPath, out filesNumber, out subDirectoriesNumber);
+                ViewModelFirstDatagrid.FilesNumber = filesNumber;
+                ViewModelFirstDatagrid.SubDirectoriesNumber = subDirectoriesNumber;
             }
             else if (datagridNumber == 2)
             {
-                IOUtilities.ClearParameters();
-                IOUtilities.SearchFilesAndDirectories(directoryPath);
-                ViewModelSecondDatagrid.DirectoryItems = IOUtilities.FilesAndDirectoriesList;
-                ViewModelSecondDatagrid.FilesNumber = IOUtilities.FilesFoundNumber;
-                ViewModelSecondDatagrid.SubDirectoriesNumber = IOUtilities.SubDirectoriesFoundNumber;
-                //IOUtilities.ClearParameters();
+                ViewModelSecondDatagrid.DirectoryItems = IOUtilities.GetDirectoryElements(directoryPath, out filesNumber, out subDirectoriesNumber);
+                ViewModelSecondDatagrid.FilesNumber = filesNumber;
+                ViewModelSecondDatagrid.SubDirectoriesNumber = subDirectoriesNumber;
             }
+
+            //((datagridNumber == 1) ? new Do(UpdateFirstDatagrid) : new Do(UpdateSecondDatagrid))();
+        }
+
+        private void UpdateFirstDatagrid()
+        { 
+        
+        }
+
+        private void UpdateSecondDatagrid()
+        { 
+        
         }
 
         #endregion

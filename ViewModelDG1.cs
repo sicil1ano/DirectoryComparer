@@ -11,6 +11,7 @@ namespace CompareDirectories
 
         private int _filesNumber;
         private int _subDirectoriesNumber;
+        private List<DataItem> _directoryItems;
 
         #endregion
 
@@ -58,7 +59,21 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the list of items existing in the directory selected.
         /// </summary>
-        public List<DataItem> DirectoryItems { get; set; }
+        public List<DataItem> DirectoryItems 
+        {
+            get
+            {
+                return _directoryItems;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    _directoryItems = value;
+                    OnPropertyChanged("DirectoryItems");
+                }
+            }
+        }
 
         /// <summary>
         /// Gets/Sets the current instance of MainViewModel.
