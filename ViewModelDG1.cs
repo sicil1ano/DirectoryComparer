@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.ObjectModel;
 
 namespace CompareDirectories
 {
-    public class ViewModelDG1 : ObservableObject
+    public class ViewModelDG1 : ObservableObject, IViewModelDG
     {
         #region Fields
 
         private int _filesNumber;
         private int _subDirectoriesNumber;
-        private List<DataItem> _directoryItems;
+        private ObservableCollection<DataItem> _directoryItems;
+        private string _directorySelected;
 
         #endregion
 
@@ -31,7 +33,7 @@ namespace CompareDirectories
                 if (value != _filesNumber)
                 {
                     _filesNumber = value;
-                    OnPropertyChanged("FilesNumber");
+                    RaisePropertyChanged("FilesNumber");
                 }
             }
         }
@@ -50,16 +52,35 @@ namespace CompareDirectories
                 if (value != _subDirectoriesNumber)
                 {
                     _subDirectoriesNumber = value;
-                    OnPropertyChanged("SubDirectoriesNumber");
+                    RaisePropertyChanged("SubDirectoriesNumber");
                 }
             }
 
         }
 
         /// <summary>
+        /// Gets/Sets the path of the directory currently selected for the scan.
+        /// </summary>
+        public string DirectorySelected 
+        {
+            get
+            {
+                return _directorySelected;
+            }
+            set
+            {
+                if (value != _directorySelected)
+                {
+                    _directorySelected = value;
+                    RaisePropertyChanged("DirectorySelected");
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets/Sets the list of items existing in the directory selected.
         /// </summary>
-        public List<DataItem> DirectoryItems 
+        public ObservableCollection<DataItem> DirectoryItems 
         {
             get
             {
@@ -70,7 +91,7 @@ namespace CompareDirectories
                 if (value != null)
                 {
                     _directoryItems = value;
-                    OnPropertyChanged("DirectoryItems");
+                    RaisePropertyChanged("DirectoryItems");
                 }
             }
         }

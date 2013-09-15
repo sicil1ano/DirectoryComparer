@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace CompareDirectories
 {
@@ -11,9 +12,9 @@ namespace CompareDirectories
         #region Fields
 
         /// <summary>
-        /// List of files and directories found during the search.
+        /// ObservableCollection of files and directories found during the search.
         /// </summary>
-        private List<DataItem> _filesAndDirectoriesList;
+        private ObservableCollection<DataItem> _filesAndDirectoriesList;
 
         #endregion
 
@@ -24,7 +25,10 @@ namespace CompareDirectories
         /// </summary>
         public MainViewModel MainViewModel { get; set; }
 
-        public List<DataItem> FilesAndDirectoriesList 
+        /// <summary>
+        /// Gets the list of items of the given directory.
+        /// </summary>
+        public ObservableCollection<DataItem> FilesAndDirectoriesList 
         {
             get
             {
@@ -46,7 +50,7 @@ namespace CompareDirectories
         /// <summary>
         /// Returns true if the directories are equal.
         /// </summary>
-        public bool EqualDirectories
+        public bool EqualsDirectories
         {
             get;
 
@@ -56,12 +60,12 @@ namespace CompareDirectories
         /// <summary>
         /// The number of files found during the search.
         /// </summary>
-        private int FilesFoundNumber { get; set; }
+        private int filesFoundNumber { get; set; }
 
         /// <summary>
         /// The number of subdirectories found during the search.
         /// </summary>
-        private int SubDirectoriesFoundNumber { get; set; }
+        private int subDirectoriesFoundNumber { get; set; }
 
         #endregion
 
@@ -74,7 +78,7 @@ namespace CompareDirectories
         public IOUtilities(MainViewModel mainViewModel)
         {
             MainViewModel = mainViewModel;
-            _filesAndDirectoriesList = new List<DataItem>();
+            _filesAndDirectoriesList = new ObservableCollection<DataItem>();
         }
 
         /// <summary>
@@ -83,7 +87,7 @@ namespace CompareDirectories
         /// <param name="directoryPath">Path of directory used to get files and directories.</param>
         private void SearchFilesAndDirectories(string directoryPath)
         {
-            List<DataItem> tempDirectoryItems = new List<DataItem>();
+            ObservableCollection<DataItem> tempDirectoryItems = new ObservableCollection<DataItem>();
             int tempFilesNumber = 0;
             int tempSubDirNumber = 0;
             DirectoryInfo dirInfo = new DirectoryInfo(directoryPath);
@@ -126,6 +130,8 @@ namespace CompareDirectories
                         ItemModifiedDate = directory.LastWriteTimeUtc
                     });
 
+                    UpdateTempVariables(tempDirectoryItems, 0, 0);
+
                     if (MainViewModel.RecursiveScan)
                     {
                         SearchFilesAndDirectories(directory.FullName);
@@ -140,8 +146,8 @@ namespace CompareDirectories
         /// <returns></returns>
         private List<DataItem> GetDifferencesList()
         {
-            List<DataItem> itemsFirstPath = MainViewModel.ViewModelFirstDatagrid.DirectoryItems;
-            List<DataItem> itemsSecondPath = MainViewModel.ViewModelSecondDatagrid.DirectoryItems;
+            ObservableCollection<DataItem> itemsFirstPath = MainViewModel.ViewModelFirstDatagrid.DirectoryItems;
+            ObservableCollection<DataItem> itemsSecondPath = MainViewModel.ViewModelSecondDatagrid.DirectoryItems;
 
             if (itemsFirstPath != null && itemsSecondPath != null)
             {
@@ -150,7 +156,7 @@ namespace CompareDirectories
 
 
                 //DifferencesList = differencesList;
-                EqualDirectories = DirectoriesAreEqual();
+                EqualsDirectories = DirectoriesAreEquals();
 
                 return differencesList;
             }
@@ -164,7 +170,7 @@ namespace CompareDirectories
         /// Checks if the directories selected contain the same items.
         /// </summary>
         /// <returns></returns>
-        private bool DirectoriesAreEqual()
+        private bool DirectoriesAreEquals()
         {
             int filesFirstPath = MainViewModel.ViewModelFirstDatagrid.FilesNumber;
             int filesSecondPath = MainViewModel.ViewModelSecondDatagrid.FilesNumber;
@@ -195,28 +201,42 @@ namespace CompareDirectories
         /// <summary>
         /// Clear the parameters of the search.
         /// </summary>
-        //public static void ClearParameters()
-        //{
-        //    _filesAndDirectoriesList.Clear();
-        //    FilesFoundNumber = 0;
-        //    SubDirectoriesFoundNumber = 0;
-        //}
-
-        private void UpdateTempVariables(List<DataItem> directoryItems, int filesNumber, int subDirectoriesNumber)
-        {
-            _filesAndDirectoriesList.AddRange(directoryItems);
-            FilesFoundNumber += filesNumber;
-            SubDirectoriesFoundNumber += subDirectoriesNumber;
-        }
-
-        public List<DataItem> GetDirectoryElements(string directoryPath, out int filesNumber, out int subDirectoriesNumber)
+        private void ClearParameters()
         {
             FilesAndDirectoriesList.Clear();
-            FilesFoundNumber = 0;
-            SubDirectoriesFoundNumber = 0;
-            SearchFilesAndDirectories(directoryPath);
-            filesNumber = FilesFoundNumber;
-            subDirectoriesNumber = SubDirectoriesFoundNumber;
+            filesFoundNumber = 0;
+            subDirectoriesFoundNumber = 0;
+        }
+
+        /// <summary>
+        /// Updates the temporary variables used in the recursive search algorithm.
+        /// </summary>
+        /// <param name="directoryItems">The temporary collection given by the search algorithm.</param>
+        /// <param name="filesNumber">The temporary number of files found by the search algorithm.</param>
+        /// <param name="subDirectoriesNumber">The temporary number of subdirectories found by the search algorithm.</param>
+        private void UpdateTempVariables(ObservableCollection<DataItem> directoryItems, int filesNumber, int subDirectoriesNumber)
+        {
+            _filesAndDirectoriesList.AddRange(directoryItems);
+            filesFoundNumber += filesNumber;
+            subDirectoriesFoundNumber += subDirectoriesNumber;
+        }
+
+        /// <summary>
+        /// Returns all the elements for the given directory.
+        /// </summary>
+        /// <param name="directoryPath">The path of the directory where the search will start.</param>
+        /// <param name="filesNumber">The number of files found in the given directory.</param>
+        /// <param name="subDirectoriesNumber">The number of subdirectories found in the given directory.</param>
+        /// <returns></returns>
+        public ObservableCollection<DataItem> GetDirectoryElements(string directoryPath, out int filesNumber, out int subDirectoriesNumber)
+        {
+            ClearParameters();
+            if (!String.IsNullOrEmpty(directoryPath))
+            {
+                SearchFilesAndDirectories(directoryPath);
+            }
+            filesNumber = filesFoundNumber;
+            subDirectoriesNumber = subDirectoriesFoundNumber;
             return FilesAndDirectoriesList;
         }
 

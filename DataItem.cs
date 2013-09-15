@@ -5,14 +5,16 @@ using System.Text;
 
 namespace CompareDirectories
 {
-    public class DataItem : IEquatable<DataItem>
+    public class DataItem : ObservableObject, IEquatable<DataItem>
     {
         #region Fields
 
         private string _itemName;
+        private bool _isSubFolder;
         private DateTime _itemCreatedDate;
         private DateTime _itemModifiedDate;
         private string _itemPath;
+        private string _itemFileExtension;
 
         #endregion
 
@@ -22,7 +24,20 @@ namespace CompareDirectories
         /// True if the directory selected is a sub folder.
         /// </summary>
         public bool IsSubFolder
-        { get; set; }
+        {
+            get
+            {
+                return _isSubFolder;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    _isSubFolder = value;
+                    RaisePropertyChanged("IsSubFolder");
+                }
+            }
+        }
 
         /// <summary>
         /// Gets/Sets the name of the file/directory selected.
@@ -36,7 +51,11 @@ namespace CompareDirectories
 
             set
             {
-                _itemName = value;
+                if (value != null)
+                {
+                    _itemName = value;
+                    RaisePropertyChanged("ItemName");
+                }
             }
         }
 
@@ -51,7 +70,11 @@ namespace CompareDirectories
             }
             set
             {
-                _itemPath = value;
+                if (value != null)
+                {
+                    _itemPath = value;
+                    RaisePropertyChanged("ItemPath");
+                }
             }
         }
 
@@ -67,7 +90,11 @@ namespace CompareDirectories
 
             set
             {
-                _itemCreatedDate = value;
+                if (value != null)
+                {
+                    _itemCreatedDate = value;
+                    RaisePropertyChanged("ItemCreatedDate");
+                }
             }
         }
 
@@ -83,14 +110,33 @@ namespace CompareDirectories
 
             set
             {
-                _itemModifiedDate = value;
+                if (value != null)
+                {
+                    _itemModifiedDate = value;
+                    RaisePropertyChanged("ItemModifiedDate");
+                }
             }
         }
 
         /// <summary>
         /// Gets/Sets the file extension of the selected file.
         /// </summary>
-        public string ItemFileExtension { get; set; }
+        public string ItemFileExtension 
+        {
+            get
+            {
+                return _itemFileExtension;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    _itemFileExtension = value;
+                    RaisePropertyChanged("ItemFileExtension");
+                }
+            }
+        
+        }
 
         #endregion
 

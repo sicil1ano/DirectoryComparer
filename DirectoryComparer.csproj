@@ -57,7 +57,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BoolToResultConverter.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="IOUtilities.cs" />
+    <Compile Include="IViewModelDG.cs" />
     <Compile Include="MainViewModel.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="ViewModelDG1.cs" />

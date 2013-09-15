@@ -1,7 +1,11 @@
 ﻿<Window x:Class="CompareDirectories.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ComparerNamespace="clr-namespace:CompareDirectories"
         Title="Directory Comparer" Height="453" Width="894" Loaded="Window_Loaded" MaxHeight="453" MaxWidth="894" MinHeight="453" MinWidth="894" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <ComparerNamespace:BoolToResultConverter x:Key="boolToResultConverter" />
+    </Window.Resources>
     <Grid Width="874" Height="421">
         <TextBox Height="23" HorizontalAlignment="Left" Margin="44,105,0,0" Name="folder1TextBox" VerticalAlignment="Top" Width="251" IsReadOnly="True"  Text="{Binding PathFirstDir}"/>
         <Button Content="..." Height="23" HorizontalAlignment="Right" Margin="0,105,540,0" Name="browseButton1" VerticalAlignment="Top" Width="33" Click="browseButton1_Click" />
@@ -42,7 +46,7 @@
         <TextBlock Text="Files Found:" Height="28" HorizontalAlignment="Left" Margin="603,361,0,0" Name="filesFound2" VerticalAlignment="Top" FontFamily="Tahoma" />
         <TextBlock Text="Subdirectories Found:" Height="28" HorizontalAlignment="Left" Margin="551,389,0,0" Name="subdirectoriesFound2" VerticalAlignment="Top" FontFamily="Tahoma" />
         <TextBlock Text="(Default Filter = All Files)" Height="28" HorizontalAlignment="Left" Margin="373,41,0,0" Name="labelDefaultFilter" VerticalAlignment="Top" FontFamily="Tahoma" FontSize="11" />
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="353,364,0,0" Name="resultOfComparingTextBlock" Text="Result" VerticalAlignment="Top" FontFamily="Tahoma" FontWeight="ExtraBold" Visibility="Hidden" Width="145" TextAlignment="Center" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="353,364,0,0" Name="resultOfComparingTextBlock" Text="Result" VerticalAlignment="Top" FontFamily="Tahoma" FontWeight="ExtraBold" Foreground="{Binding Color, Converter={StaticResource boolToResultConverter}}" Width="145" TextAlignment="Center" />
         <CheckBox Content="Recursive Scan" Height="16" HorizontalAlignment="Left" Margin="381,76,0,0" Name="recursiveScanCheck" VerticalAlignment="Top" FontFamily="Tahoma" IsChecked="{Binding RecursiveScan,Mode=TwoWay}"/>
 
     </Grid>
