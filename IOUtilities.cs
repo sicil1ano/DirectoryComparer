@@ -118,6 +118,7 @@ namespace CompareDirectories
 
             foreach (var directory in directories)
 	        {
+                tempDirectoryItems.Clear();
                 if (directory != null)
                 {
                     tempDirectoryItems.Add(new DataItem()
