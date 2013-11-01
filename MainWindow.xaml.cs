@@ -1,26 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
-using System.IO;
-using System.ComponentModel;
-using System.Windows.Threading;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Interop;
 
 namespace CompareDirectories
 {
     /// <summary>
-    /// Logica di interazione per MainWindow.xaml
+    /// Main View code-behind class.
     /// </summary>
     public partial class MainWindow : Window
     {
-        /* settings for the window */
+        #region Window Settings
 
         [DllImport("user32.dll")]
         private extern static Int32 SetWindowLong(IntPtr hWnd, Int32 nIndex, Int32 dwNewLong);
@@ -31,7 +24,9 @@ namespace CompareDirectories
         private const Int32 WS_MAXIMIZEBOX = 0x10000;
         private const Int32 WS_MINIMIZEBOX = 0x20000;
 
-        /* end settings */
+        #endregion
+
+        #region Properties
 
         private string GetFilter
         {
@@ -49,70 +44,20 @@ namespace CompareDirectories
             set;
         }
 
-        public IOUtilities IOUtilities { get; set; }
+        #endregion
+
+        #region Constructors
 
         public MainWindow()
         {
             InitializeComponent();
-            MainViewModel = new CompareDirectories.MainViewModel();
+            this.MainViewModel = new MainViewModel();
             comboBoxFilters();
-            this.DataContext = MainViewModel;
-            IOUtilities = new IOUtilities(MainViewModel);
+            this.DataContext = this.MainViewModel;
             FilterChosen = "*.*";
         }
 
-        //void workerRecursive_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        //{
-        //    this.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate()
-        //    {
-        //        updateDatagrids();
-        //        firstDataGrid.Items.Refresh();
-        //        secondDataGrid.Items.Refresh();
-        //        System.Threading.Thread.Sleep(100);
-        //    }));
-
-
-        //}
-
-        //void workerRecursive_DoWork(object sender, DoWorkEventArgs e)
-        //{
-        //    worker1.RunWorkerAsync(path1);
-
-        //    worker2.RunWorkerAsync(path2);
-        //    System.Threading.Thread.Sleep(250);
-        //}
-
-        //void worker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        //{
-        //    this.Dispatcher.Invoke(DispatcherPriority.Render, new Action(delegate()
-        //        {
-        //            updateSecondDatagrid();
-        //            updateFileDirCounters2();
-        //        }));
-        //    System.Threading.Thread.Sleep(100);
-
-        //}
-
-        //void worker2_DoWork(object sender, DoWorkEventArgs e)
-        //{
-        //    scanForFiles2(path2);
-        //}
-
-        //void worker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        //{
-
-        //    this.Dispatcher.Invoke(DispatcherPriority.Render, new Action(delegate()
-        //    {
-        //        updateFirstDatagrid();
-        //        updateFileDirCounters1();
-        //    }));
-        //    System.Threading.Thread.Sleep(100);
-        //}
-
-        //void worker1_DoWork(object sender, DoWorkEventArgs e)
-        //{
-        //    scanForFiles1(path1);
-        //}
+        #endregion
 
         private void browseButton1_Click(object sender, RoutedEventArgs e)
         {
@@ -130,7 +75,6 @@ namespace CompareDirectories
                 {
                     MainViewModel.PathFirstDir = dialog.SelectedPath;
                     MainViewModel.GetFilesAndDirectories(MainViewModel.ViewModelFirstDatagrid);
-                    //firstDataGrid.Items.Refresh();
                 }
             }
         }
@@ -145,43 +89,42 @@ namespace CompareDirectories
                 bool newDirectoryPath = false;
                 if (!emptyDirectoryPath)
                 {
-                    newDirectoryPath = (!MainViewModel.PathFirstDir.Equals(dialog.SelectedPath));
+                    newDirectoryPath = (!MainViewModel.PathSecondDir.Equals(dialog.SelectedPath));
                 }
                 if ((emptyDirectoryPath) || (newDirectoryPath))
                 {
                     MainViewModel.PathSecondDir = dialog.SelectedPath;
                     MainViewModel.GetFilesAndDirectories(MainViewModel.ViewModelSecondDatagrid);
-                    //secondDataGrid.Items.Refresh();
                 }
             }
         }
-                   
+
 
         /* method to set the filters available in the filter dropdown */
 
-        private void comboBoxFilters()
-        {
-            ObservableCollection<Filter> filtersList = new ObservableCollection<Filter>();
-            string[] array = new string[] { "*.*", "*.pdf", "*.txt", "*.config", "*.dll", "*.zip", "*.rar", "*.exe" };
-            foreach (string filter in array)
-            {
-                filtersList.Add(new Filter()
-                {
-                    Name = filter
-                });
-            }
-            fileFilterDropDown.DataContext = filtersList;
+        //private void comboBoxFilters()
+        //{
+        //    ObservableCollection<Filter> filtersList = new ObservableCollection<Filter>();
+        //    string[] array = new string[] { "*.*", "*.pdf", "*.txt", "*.config", "*.dll", "*.zip", "*.rar", "*.exe" };
+        //    foreach (string filter in array)
+        //    {
+        //        filtersList.Add(new Filter()
+        //        {
+        //            Name = filter
+        //        });
+        //    }
+        //    fileFilterDropDown.DataContext = filtersList;
 
-        }
+        //}
 
-        public class Filter
-        {
-            public string Name
-            {
-                get;
-                set;
-            }
-        }
+        //public class Filter
+        //{
+        //    public string Name
+        //    {
+        //        get;
+        //        set;
+        //    }
+        //}
 
         private void fileFilterDropDown_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -189,13 +132,10 @@ namespace CompareDirectories
             FilterChosen = itemSelected.Name;
             if (folder1TextBox.Text.Length != 0)
             {
-
-                //worker1.RunWorkerAsync(folder1TextBox.Text);
                 firstDataGrid.Items.Refresh();
             }
             if (folder2TextBox.Text.Length != 0)
             {
-
                 //worker2.RunWorkerAsync(folder1TextBox.Text);
                 secondDataGrid.Items.Refresh();
             }
@@ -204,14 +144,13 @@ namespace CompareDirectories
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-
             IntPtr hWnd = new WindowInteropHelper(this).Handle;
             Int32 windowLong = GetWindowLong(hWnd, GWL_STYLE);
             windowLong = windowLong & ~WS_MAXIMIZEBOX;
             SetWindowLong(hWnd, GWL_STYLE, windowLong);
         }
 
-        
+
         private void firstDataGrid_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (e.HorizontalChange != 0.0f)
@@ -247,36 +186,6 @@ namespace CompareDirectories
             firstDataGrid.Items.Refresh();
         }
 
-        //private void checkIfFoldersAreEqual()
-        //{
-        //    if (FilesFound1 == FilesFound2 && SubDirectoriesFound1 == SubDirectoriesFound2)
-        //    {
-
-        //        bool checkLists = listDiff.Count == 0;
-        //        //bool checkLists = filesList1.SequenceEqual(filesList2);
-        //        if (checkLists)
-        //        {
-        //            resultOfComparingTextBlock.Text = "Equal Folders!";
-        //            resultOfComparingTextBlock.Foreground = new SolidColorBrush(Colors.DarkGreen);
-        //            resultOfComparingTextBlock.Visibility = System.Windows.Visibility.Visible;
-        //        }
-        //        else
-        //        {
-        //            resultOfComparingTextBlock.Text = "Different Folders!";
-        //            resultOfComparingTextBlock.Foreground = new SolidColorBrush(Colors.DarkRed);
-        //            resultOfComparingTextBlock.Visibility = System.Windows.Visibility.Visible;
-
-        //        }
-
-        //    }
-        //    else
-        //    {
-        //        resultOfComparingTextBlock.Text = "Different Folders!";
-        //        resultOfComparingTextBlock.Foreground = new SolidColorBrush(Colors.DarkRed);
-        //        resultOfComparingTextBlock.Visibility = System.Windows.Visibility.Visible;
-        //    }
-        //}
-
         private void secondDataGrid_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (e.HorizontalChange != 0.0f)
@@ -311,24 +220,11 @@ namespace CompareDirectories
             secondDataGrid.Items.Refresh();
         }
 
-
-        //private void showDiffTwoCollections()
-        //{
-        //    if(listDiff != null) 
-        //        listDiff.Clear();
-        //   listDiff = filesList1.Where(x => !filesList2.Any(x1 => x1.ItemName == x.ItemName))
-        //        .Union(filesList2.Where(x => !filesList1.Any(x1 => x1.ItemName == x.ItemName))).ToList<CompareDirectories.DataItem>();
-
-
-        //}
-
         private void secondDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
 
             if (folder1TextBox.Text.Length != 0)
             {
-
-
                 DataItem rowDataContext = e.Row.DataContext as DataItem;
 
                 if (rowDataContext != null)
@@ -361,7 +257,6 @@ namespace CompareDirectories
 
             if (folder2TextBox.Text.Length != 0)
             {
-
                 DataGridRow item = e.Row;
                 var c = item.DataContext as DataItem;
 

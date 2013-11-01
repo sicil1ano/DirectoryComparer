@@ -16,6 +16,8 @@ namespace CompareDirectories
         /// </summary>
         private ObservableCollection<DataItem> _filesAndDirectoriesList;
 
+        private List<DataItem> _differencesList;
+
         #endregion
 
         #region Properties
@@ -26,31 +28,20 @@ namespace CompareDirectories
         public MainViewModel MainViewModel { get; set; }
 
         /// <summary>
-        /// Gets the list of items of the given directory.
-        /// </summary>
-        public ObservableCollection<DataItem> FilesAndDirectoriesList 
-        {
-            get
-            {
-                return _filesAndDirectoriesList;
-            }
-        }
-
-        /// <summary>
         /// Gets/Sets the list of differences found between the two directories.
         /// </summary>
         public List<DataItem> DifferencesList
         {
             get
             {
-                return GetDifferencesList();
+                return this._differencesList;
             }
         }
 
         /// <summary>
         /// Returns true if the directories are equal.
         /// </summary>
-        public bool EqualsDirectories
+        public bool EqualDirectories
         {
             get;
 
@@ -69,7 +60,7 @@ namespace CompareDirectories
 
         #endregion
 
-        #region Members
+        #region Constructors
 
         /// <summary>
         /// Main Constructor.
@@ -77,9 +68,12 @@ namespace CompareDirectories
         /// <param name="mainViewModel"></param>
         public IOUtilities(MainViewModel mainViewModel)
         {
-            MainViewModel = mainViewModel;
-            _filesAndDirectoriesList = new ObservableCollection<DataItem>();
+            this.MainViewModel = mainViewModel;
         }
+
+        #endregion
+
+        #region Members
 
         /// <summary>
         /// Gets the list of files and directories for the path selected.
@@ -94,10 +88,10 @@ namespace CompareDirectories
 
             var files = dirInfo.EnumerateFiles();
             tempFilesNumber = files.Count();
-            
+
 
             foreach (var file in files)
-	        {
+            {
                 if (file != null)
                 {
                     tempDirectoryItems.Add(new DataItem()
@@ -117,7 +111,7 @@ namespace CompareDirectories
             UpdateTempVariables(tempDirectoryItems, tempFilesNumber, tempSubDirNumber);
 
             foreach (var directory in directories)
-	        {
+            {
                 tempDirectoryItems.Clear();
                 if (directory != null)
                 {
@@ -131,9 +125,9 @@ namespace CompareDirectories
                         ItemModifiedDate = directory.LastWriteTimeUtc
                     });
 
-                    UpdateTempVariables(tempDirectoryItems, 0, 0);
+                    UpdateTempVariables(tempDirectoryItems);
 
-                    if (MainViewModel.RecursiveScan)
+                    if (this.MainViewModel.RecursiveScanEnabled)
                     {
                         SearchFilesAndDirectories(directory.FullName);
                     }
@@ -145,25 +139,19 @@ namespace CompareDirectories
         /// Get the list of differences existing between the two directories selected.
         /// </summary>
         /// <returns></returns>
-        private List<DataItem> GetDifferencesList()
+        private void GetDifferencesList()
         {
-            ObservableCollection<DataItem> itemsFirstPath = MainViewModel.ViewModelFirstDatagrid.DirectoryItems;
-            ObservableCollection<DataItem> itemsSecondPath = MainViewModel.ViewModelSecondDatagrid.DirectoryItems;
+            //the algorithm could be improved?
+            ObservableCollection<DataItem> itemsFirstPath = this.MainViewModel.ViewModelFirstDatagrid.DirectoryItems;
+            ObservableCollection<DataItem> itemsSecondPath = this.MainViewModel.ViewModelSecondDatagrid.DirectoryItems;
 
             if (itemsFirstPath != null && itemsSecondPath != null)
             {
-                var differencesList = itemsFirstPath.Where(x => !itemsSecondPath.Any(x1 => x1.ItemName == x.ItemName))
+                this._differencesList = itemsFirstPath.Where(x => !itemsSecondPath.Any(x1 => x1.ItemName == x.ItemName))
                      .Union(itemsSecondPath.Where(x => !itemsFirstPath.Any(x1 => x1.ItemName == x.ItemName))).ToList<CompareDirectories.DataItem>();
 
 
-                //DifferencesList = differencesList;
-                EqualsDirectories = DirectoriesAreEquals();
-
-                return differencesList;
-            }
-            else
-            {
-                return new List<DataItem>();
+                this.EqualDirectories = DirectoriesAreEquals();
             }
         }
 
@@ -173,25 +161,12 @@ namespace CompareDirectories
         /// <returns></returns>
         private bool DirectoriesAreEquals()
         {
-            int filesFirstPath = MainViewModel.ViewModelFirstDatagrid.FilesNumber;
-            int filesSecondPath = MainViewModel.ViewModelSecondDatagrid.FilesNumber;
+            bool sameNumberOfFiles = this.MainViewModel.ViewModelFirstDatagrid.FilesNumber == this.MainViewModel.ViewModelSecondDatagrid.FilesNumber;
+            bool sameNumberofSubDirectories = this.MainViewModel.ViewModelFirstDatagrid.SubDirectoriesNumber == this.MainViewModel.ViewModelSecondDatagrid.SubDirectoriesNumber;
 
-            int subDirectoriesFirstPath = MainViewModel.ViewModelFirstDatagrid.SubDirectoriesNumber;
-            int subDirectoriesSecondPath = MainViewModel.ViewModelSecondDatagrid.SubDirectoriesNumber;
-
-            bool sameNumberOfFiles = filesFirstPath == filesSecondPath;
-            bool sameNumberofSubDirectories = subDirectoriesFirstPath == subDirectoriesSecondPath;
-
-            if (sameNumberOfFiles && sameNumberofSubDirectories)
+            if (sameNumberOfFiles && sameNumberofSubDirectories && DifferencesList.Count == 0)
             {
-                if (DifferencesList.Count == 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return true;
-                }
+                return true;
             }
             else
             {
@@ -204,9 +179,9 @@ namespace CompareDirectories
         /// </summary>
         private void ClearParameters()
         {
-            FilesAndDirectoriesList.Clear();
-            filesFoundNumber = 0;
-            subDirectoriesFoundNumber = 0;
+            this._filesAndDirectoriesList = new ObservableCollection<DataItem>();
+            this.filesFoundNumber = 0;
+            this.subDirectoriesFoundNumber = 0;
         }
 
         /// <summary>
@@ -215,11 +190,11 @@ namespace CompareDirectories
         /// <param name="directoryItems">The temporary collection given by the search algorithm.</param>
         /// <param name="filesNumber">The temporary number of files found by the search algorithm.</param>
         /// <param name="subDirectoriesNumber">The temporary number of subdirectories found by the search algorithm.</param>
-        private void UpdateTempVariables(ObservableCollection<DataItem> directoryItems, int filesNumber, int subDirectoriesNumber)
+        private void UpdateTempVariables(ObservableCollection<DataItem> directoryItems, int filesNumber = 0, int subDirectoriesNumber = 0)
         {
-            _filesAndDirectoriesList.AddRange(directoryItems);
-            filesFoundNumber += filesNumber;
-            subDirectoriesFoundNumber += subDirectoriesNumber;
+            this._filesAndDirectoriesList.AddRange(directoryItems);
+            this.filesFoundNumber += filesNumber;
+            this.subDirectoriesFoundNumber += subDirectoriesNumber;
         }
 
         /// <summary>
@@ -238,7 +213,17 @@ namespace CompareDirectories
             }
             filesNumber = filesFoundNumber;
             subDirectoriesNumber = subDirectoriesFoundNumber;
-            return FilesAndDirectoriesList;
+
+            return this._filesAndDirectoriesList;
+        }
+
+        /// <summary>
+        /// Check the equality of the contents of the directories.
+        /// </summary>
+        public void CheckDirectoriesEquality()
+        {
+            this._differencesList = new List<DataItem>();
+            GetDifferencesList();
         }
 
         #endregion

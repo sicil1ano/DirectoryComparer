@@ -31,12 +31,7 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the path of directory currently selected for the scan.
         /// </summary>
-        string DirectorySelected { get; set; }
-
-        /// <summary>
-        /// Gets/Sets the current instance of MainViewModel.
-        /// </summary>
-        MainViewModel MainViewModel { get; set; }
+        string SelectedDirectory { get; set; }
 
         #endregion
     }

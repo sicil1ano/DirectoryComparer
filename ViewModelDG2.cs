@@ -13,7 +13,7 @@ namespace CompareDirectories
         private int _filesNumber;
         private int _subDirectoriesNumber;
         private ObservableCollection<DataItem> _directoryItems;
-        private string _directorySelected;
+        private string _selectedDirectory;
 
         #endregion
 
@@ -26,13 +26,13 @@ namespace CompareDirectories
         {
             get
             {
-                return _filesNumber;
+                return this._filesNumber;
             }
             set
             {
-                if (value != _filesNumber)
+                if (value != this._filesNumber)
                 {
-                    _filesNumber = value;
+                    this._filesNumber = value;
                     RaisePropertyChanged("FilesNumber");
                 }
             }
@@ -45,13 +45,13 @@ namespace CompareDirectories
         {
             get
             {
-                return _subDirectoriesNumber;
+                return this._subDirectoriesNumber;
             }
             set
             {
-                if (value != _subDirectoriesNumber)
+                if (value != this._subDirectoriesNumber)
                 {
-                    _subDirectoriesNumber = value;
+                    this._subDirectoriesNumber = value;
                     RaisePropertyChanged("SubDirectoriesNumber");
                 }
             }
@@ -61,57 +61,50 @@ namespace CompareDirectories
         /// <summary>
         /// Path of current directory selected for the scan.
         /// </summary>
-        public string DirectorySelected
+        public string SelectedDirectory
         {
             get
             {
-                return _directorySelected;
+                return this._selectedDirectory;
             }
             set
             {
-                if (value != _directorySelected)
+                if (value != this._selectedDirectory)
                 {
-                    _directorySelected = value;
-                    RaisePropertyChanged("DirectorySelected");
+                    this._selectedDirectory = value;
+                    RaisePropertyChanged("SelectedDirectory");
                 }
             }
         }
 
         /// <summary>
-        /// Gets/Sets the path of the directory currently selected for the scan.
+        /// Gets/Sets the list of items existing in the directory selected.
         /// </summary>
         public ObservableCollection<DataItem> DirectoryItems 
         {
             get
             {
-                return _directoryItems;
+                return this._directoryItems;
             }
             set
             {
                 if (value != null)
                 {
-                    _directoryItems = value;
+                    this._directoryItems = value;
                     RaisePropertyChanged("DirectoryItems");
                 }
             }
         }
 
-        /// <summary>
-        /// Gets/Sets the current instance of MainViewModel.
-        /// </summary>
-        public MainViewModel MainViewModel { get; set; }
-
         #endregion
 
-        #region Members
+        #region Constructors
 
         /// <summary>
         /// Main Constructor.
         /// </summary>
-        /// <param name="mainViewModel">Reference to the MainViewModel.</param>
-        public ViewModelDG2(MainViewModel mainViewModel)
+        public ViewModelDG2()
         {
-            MainViewModel = mainViewModel;
         }
 
         #endregion

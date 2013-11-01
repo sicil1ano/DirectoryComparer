@@ -58,6 +58,7 @@
     </ApplicationDefinition>
     <Compile Include="BoolToResultConverter.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Filter.cs" />
     <Compile Include="IOUtilities.cs" />
     <Compile Include="IViewModelDG.cs" />
     <Compile Include="MainViewModel.cs" />
@@ -79,7 +80,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackgroundWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
