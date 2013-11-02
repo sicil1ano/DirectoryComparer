@@ -135,6 +135,7 @@ namespace CompareDirectories
             this.ViewModelSecondDatagrid = new ViewModelDG2();
             this.IOUtilities = new IOUtilities(this);
             this.Filter = new Filter();
+            this.Filter.LoadFilters();
             this.PathFirstDir = String.Empty;
             this.PathSecondDir = String.Empty;
         }

@@ -31,7 +31,7 @@ namespace CompareDirectories
             }
             set
             {
-                if (value != null)
+                if (value != _isSubFolder)
                 {
                     _isSubFolder = value;
                     RaisePropertyChanged("IsSubFolder");

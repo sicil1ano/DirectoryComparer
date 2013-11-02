@@ -52,12 +52,12 @@ namespace CompareDirectories
         {
             InitializeComponent();
             this.MainViewModel = new MainViewModel();
-            comboBoxFilters();
             this.DataContext = this.MainViewModel;
-            FilterChosen = "*.*";
         }
 
         #endregion
+
+        #region Event Handlers
 
         private void browseButton1_Click(object sender, RoutedEventArgs e)
         {
@@ -98,33 +98,6 @@ namespace CompareDirectories
                 }
             }
         }
-
-
-        /* method to set the filters available in the filter dropdown */
-
-        //private void comboBoxFilters()
-        //{
-        //    ObservableCollection<Filter> filtersList = new ObservableCollection<Filter>();
-        //    string[] array = new string[] { "*.*", "*.pdf", "*.txt", "*.config", "*.dll", "*.zip", "*.rar", "*.exe" };
-        //    foreach (string filter in array)
-        //    {
-        //        filtersList.Add(new Filter()
-        //        {
-        //            Name = filter
-        //        });
-        //    }
-        //    fileFilterDropDown.DataContext = filtersList;
-
-        //}
-
-        //public class Filter
-        //{
-        //    public string Name
-        //    {
-        //        get;
-        //        set;
-        //    }
-        //}
 
         private void fileFilterDropDown_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -279,5 +252,7 @@ namespace CompareDirectories
                 }
             }
         }
+
+        #endregion
     }
 }

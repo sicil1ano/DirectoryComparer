@@ -6,11 +6,13 @@
     <Window.Resources>
         <ComparerNamespace:BoolToResultConverter x:Key="boolToResultConverter" />
     </Window.Resources>
+    
     <Grid Width="874" Height="421">
         <TextBox Height="23" HorizontalAlignment="Left" Margin="44,105,0,0" Name="folder1TextBox" VerticalAlignment="Top" Width="251" IsReadOnly="True"  Text="{Binding PathFirstDir}"/>
         <Button Content="..." Height="23" HorizontalAlignment="Right" Margin="0,105,540,0" Name="browseButton1" VerticalAlignment="Top" Width="33" Click="browseButton1_Click" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="519,104,0,0" Name="folder2TextBox" VerticalAlignment="Top" Width="251" IsReadOnly="True"  Text="{Binding PathSecondDir}"/>
         <Button Content="..." Height="23" HorizontalAlignment="Right" Margin="0,105,65,0" Name="browseButton2" VerticalAlignment="Top" Width="33" Click="browseButton2_Click" />
+        
         <ComboBox Height="23" HorizontalAlignment="Left" Margin="378,12,0,0" Name="fileFilterDropDown" VerticalAlignment="Top" Width="120"  ItemsSource="{Binding Filter.FiltersList}" SelectionChanged="fileFilterDropDown_SelectionChanged" FontFamily="Tahoma">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -21,6 +23,8 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <TextBlock Text="Extension Filter:" Height="28" HorizontalAlignment="Left" Margin="291,13,0,0" Name="label1" VerticalAlignment="Top" Width="87" FontFamily="Tahoma" />
+        
+        
         <DataGrid AutoGenerateColumns="False" Height="200" HorizontalAlignment="Left" Margin="9,155,0,0" Name="firstDataGrid" VerticalAlignment="Top" Width="362" ItemsSource="{Binding ViewModelFirstDatagrid.DirectoryItems}" IsReadOnly="True" HorizontalGridLinesBrush="#00000000" FontFamily="Tahoma" ScrollViewer.ScrollChanged="firstDataGrid_ScrollChanged" LoadingRow="firstDataGrid_LoadingRow" EnableColumnVirtualization="True" EnableRowVirtualization="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding ItemName}" Width="380"/>
@@ -35,18 +39,25 @@
                 <DataGridTextColumn Header="Last Edit Date" Binding="{Binding ItemModifiedDate}"/>
             </DataGrid.Columns>
         </DataGrid>
+        
+        
         <Image Height="48" HorizontalAlignment="Left" Margin="376,226,0,0" Name="programImage" Stretch="Fill" VerticalAlignment="Top" Width="103" Source="Resources\folder_diff.png" />
         <Image Height="34" HorizontalAlignment="Left" Margin="261,6,0,0" Name="image_filter" Stretch="Fill" VerticalAlignment="Top" Width="34" Source="Resources\filter.png" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="169,359,0,0" Name="filesFound1TextBox" VerticalAlignment="Top" Width="120"  IsReadOnly="True" Focusable="False" Text="{Binding ViewModelFirstDatagrid.FilesNumber}"/>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="672,359,0,0" Name="filesFound2TextBox" VerticalAlignment="Top" Width="120" IsReadOnly="True" Focusable="False" Text="{Binding ViewModelSecondDatagrid.FilesNumber}"/>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="169,389,0,0" Name="subdirectories1FoundTextBox" VerticalAlignment="Top" Width="120" IsReadOnly="True" Focusable="False" Text="{Binding ViewModelFirstDatagrid.SubDirectoriesNumber}"/>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="672,389,0,0" Name="subdirectoriesFound2TextBox" VerticalAlignment="Top" Width="120" IsReadOnly="True" Focusable="False" Text="{Binding ViewModelSecondDatagrid.SubDirectoriesNumber}"/>
+        
         <TextBlock Text="Files Found:" Height="28" HorizontalAlignment="Left" Margin="100,359,0,0" Name="filesFound1" VerticalAlignment="Top" FontFamily="Tahoma" />
         <TextBlock Text="Subdirectories Found:" Height="28" HorizontalAlignment="Left" Margin="48,389,0,0" Name="subdirFound1" VerticalAlignment="Top" FontFamily="Tahoma" />
+        
         <TextBlock Text="Files Found:" Height="28" HorizontalAlignment="Left" Margin="603,361,0,0" Name="filesFound2" VerticalAlignment="Top" FontFamily="Tahoma" />
         <TextBlock Text="Subdirectories Found:" Height="28" HorizontalAlignment="Left" Margin="551,389,0,0" Name="subdirectoriesFound2" VerticalAlignment="Top" FontFamily="Tahoma" />
+        
         <TextBlock Text="(Default Filter = All Files)" Height="28" HorizontalAlignment="Left" Margin="373,41,0,0" Name="labelDefaultFilter" VerticalAlignment="Top" FontFamily="Tahoma" FontSize="11" />
+        
         <TextBlock Height="23" HorizontalAlignment="Left" Margin="353,364,0,0" Name="resultOfComparingTextBlock" Text="Result" VerticalAlignment="Top" FontFamily="Tahoma" FontWeight="ExtraBold" Foreground="{Binding EqualDirectories, Converter={StaticResource boolToResultConverter}}" Width="145" TextAlignment="Center" />
+        
         <CheckBox Content="Recursive Scan" Height="16" HorizontalAlignment="Left" Margin="381,76,0,0" Name="recursiveScanCheck" VerticalAlignment="Top" FontFamily="Tahoma" IsChecked="{Binding RecursiveScanEnabled,Mode=TwoWay}"/>
 
     </Grid>

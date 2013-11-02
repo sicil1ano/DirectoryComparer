@@ -82,8 +82,6 @@ namespace CompareDirectories
         /// </summary>
         public Filter()
         {
-            this.FiltersList = new ObservableCollection<Filter>();
-            //LoadFilters();
         }
 
         #endregion
@@ -93,15 +91,19 @@ namespace CompareDirectories
         /// <summary>
         /// Adds filters to the FiltersList property.
         /// </summary>
-        private void LoadFilters()
+        public void LoadFilters()
         {
-            string[] array = new string[] { "*.*", "*.pdf", "*.txt", "*.config", "*.dll", "*.zip", "*.rar", "*.exe" };
-            foreach (string filter in array)
+            if (this.FiltersList == null)
             {
-                FiltersList.Add(new Filter()
+                this.FiltersList = new ObservableCollection<Filter>();
+                string[] array = new string[] { "*.*", "*.pdf", "*.txt", "*.config", "*.dll", "*.zip", "*.rar", "*.exe" };
+                foreach (string filter in array)
                 {
-                    Name = filter
-                });
+                    FiltersList.Add(new Filter()
+                    {
+                        Name = filter
+                    });
+                }
             }
         }
 
