@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace CompareDirectories
 {
@@ -11,14 +13,21 @@ namespace CompareDirectories
     {
         #region Fields
 
-        private bool _recursiveScanEnabled;
-        private string _pathFirstDir;
-        private string _pathSecondDir;
-        private bool _equalDirectories;
+        private bool isRecursiveScan;
+        private string pathFirstDir;
+        private string pathSecondDir;
+        private bool equalDirectories;
+        private Filter selectedFilter;
+        
 
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Gets/Sets the FilterViewModel instance.
+        /// </summary>
+        public FilterViewModel FilterViewModel { get; set; }
 
         /// <summary>
         /// Gets/Sets the ViewModelDG1 instance.
@@ -38,26 +47,51 @@ namespace CompareDirectories
         //è meglio considerare un enum per i filtri? Occhio alla property GetFilter di main window..
 
         /// <summary>
-        /// Gets/Sets the Filter instance.
+        /// Gets the filters list.
         /// </summary>
-        public Filter Filter { get; set; }
+        public List<Filter> FiltersList
+        {
+            get
+            {
+                return FilterViewModel.FiltersList;
+            }
+        }
+
+        /// <summary>
+        /// Gets the selected file filter.
+        /// </summary>
+        public Filter SelectedFilter
+        {
+            get
+            {
+                return this.selectedFilter;
+            }
+            set
+            {
+                if (value != this.selectedFilter)
+                {
+                    this.selectedFilter = value;
+                    RaisePropertyChanged("SelectedFilter");
+                }
+            }
+        }
 
         /// <summary>
         /// Gets/Sets the recursive scan check.
         /// </summary>
-        public bool RecursiveScanEnabled
+        public bool IsRecursiveScan
         {
             get
             {
-                return this._recursiveScanEnabled;
+                return this.isRecursiveScan;
             }
 
             set
             {
-                if (value != this._recursiveScanEnabled)
+                if (value != this.isRecursiveScan)
                 {
-                    this._recursiveScanEnabled = value;
-                    RaisePropertyChanged("RecursiveScanEnabled");
+                    this.isRecursiveScan = value;
+                    RaisePropertyChanged("IsRecursiveScan");
                     GetFilesAndDirectoriesDatagrids();
                 }
             }
@@ -70,13 +104,13 @@ namespace CompareDirectories
         {
             get
             {
-                return this._pathFirstDir;
+                return this.pathFirstDir;
             }
             set
             {
-                if (value != this._pathFirstDir)
+                if (value != this.pathFirstDir)
                 {
-                    this._pathFirstDir = value;
+                    this.pathFirstDir = value;
                     RaisePropertyChanged("PathFirstDir");
                     this.ViewModelFirstDatagrid.SelectedDirectory = value;
                 }
@@ -90,13 +124,13 @@ namespace CompareDirectories
         {
             get
             {
-                return this._pathSecondDir;
+                return this.pathSecondDir;
             }
             set
             {
-                if (value != this._pathSecondDir)
+                if (value != this.pathSecondDir)
                 {
-                    this._pathSecondDir = value;
+                    this.pathSecondDir = value;
                     RaisePropertyChanged("PathSecondDir");
                     this.ViewModelSecondDatagrid.SelectedDirectory = value;
                 }
@@ -110,13 +144,13 @@ namespace CompareDirectories
         {
             get
             {
-                return this._equalDirectories;
+                return this.equalDirectories;
             }
             set
             {
-                if (value != this._equalDirectories)
+                if (value != this.equalDirectories)
                 {
-                    this._equalDirectories = value;
+                    this.equalDirectories = value;
                     RaisePropertyChanged("EqualDirectories");
                 }
             }
@@ -134,11 +168,13 @@ namespace CompareDirectories
             this.ViewModelFirstDatagrid = new ViewModelDG1();
             this.ViewModelSecondDatagrid = new ViewModelDG2();
             this.IOUtilities = new IOUtilities(this);
-            this.Filter = new Filter();
-            this.Filter.LoadFilters();
+            this.FilterViewModel = new FilterViewModel();
+            this.SelectedFilter = FiltersList.First();
             this.PathFirstDir = String.Empty;
             this.PathSecondDir = String.Empty;
         }
+
+
 
         #endregion
 
@@ -148,25 +184,32 @@ namespace CompareDirectories
         /// Gets the list of the files and directories existing in the selected directory of ViewModel instance.
         /// </summary>
         /// <param name="viewModel">The ViewModel instance that invoked the update of its properties.</param>
-        public void GetFilesAndDirectories(IViewModelDG viewModel)
+        public void GetFilesAndDirectories(IViewModelDG viewModel, bool isResursiveSearch)
         {
             int filesNumber = 0;
             int subDirectoriesNumber = 0;
-            ObservableCollection<DataItem> directoryItems;
-            Task<ObservableCollection<DataItem>> tsk = new Task<ObservableCollection<DataItem>>(() => IOUtilities.GetDirectoryElements(viewModel.SelectedDirectory, out filesNumber, out subDirectoriesNumber));
+            var context = TaskScheduler.FromCurrentSynchronizationContext();
+            var task = new Task<ObservableCollection<DataItem>>(() =>
+                {
+                    var res = IOUtilities.GetDirectoryElements(viewModel.SelectedDirectory, isResursiveSearch, out filesNumber, out subDirectoriesNumber);
+                    return res;
+                });
 
-            //directoryItems = IOUtilities.GetDirectoryElements(viewModel.SelectedDirectory, out filesNumber, out subDirectoriesNumber);
-            tsk.Start();
-            try
-            {
-                directoryItems = tsk.Result;
-                UpdateDatagrid(viewModel, directoryItems, filesNumber, subDirectoriesNumber);
-            }
-            catch (AggregateException ex)
-            {
-                ex.Handle(e => e is OperationCanceledException);
-                Console.WriteLine("The task GetFilesAndDirectories was canceled");
-            }
+            task.ContinueWith(t =>
+                {
+                    UpdateDatagrid(viewModel, t.Result, filesNumber, subDirectoriesNumber);
+                },
+                System.Threading.CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, context);
+
+            task.ContinueWith(t =>
+                {
+                    AggregateException aggregateException = t.Exception;
+                    aggregateException.Handle(exception => true);
+                    Console.WriteLine("The task GetFilesAndDirectories was canceled");
+                },
+                System.Threading.CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, context);
+
+            task.Start();
         }
 
         /// <summary>
@@ -178,9 +221,14 @@ namespace CompareDirectories
         /// <param name="subDirectoriesNumber">Number of subdirectories found.</param>
         private void UpdateDatagrid(IViewModelDG viewModel, ObservableCollection<DataItem> directoryItems, int filesNumber, int subDirectoriesNumber)
         {
+            if (viewModel.DirectoryItems != null && viewModel.DirectoryItems.Any())
+            {
+                viewModel.DirectoryItems.Clear();
+            }
+
             viewModel.DirectoryItems = directoryItems;
             viewModel.FilesNumber = filesNumber;
-            viewModel.SubDirectoriesNumber = subDirectoriesNumber;
+            viewModel.DirectoriesNumber = subDirectoriesNumber;
             UpdateDirectoriesEquality();
         }
 
@@ -189,19 +237,14 @@ namespace CompareDirectories
         /// </summary>
         private void GetFilesAndDirectoriesDatagrids()
         {
-            if ((!String.IsNullOrEmpty(this.PathFirstDir)) && (!String.IsNullOrEmpty(this.PathSecondDir)))
+            if ((!String.IsNullOrEmpty(this.PathFirstDir)))
             {
-                GetFilesAndDirectories(ViewModelFirstDatagrid);
-                GetFilesAndDirectories(ViewModelSecondDatagrid);
-            }
-            else if ((!String.IsNullOrEmpty(this.PathFirstDir)))
-            {
-                GetFilesAndDirectories(ViewModelFirstDatagrid);
+                GetFilesAndDirectories(ViewModelFirstDatagrid, IsRecursiveScan);
             }
 
-            else if ((!String.IsNullOrEmpty(this.PathSecondDir)))
+            if ((!String.IsNullOrEmpty(this.PathSecondDir)))
             {
-                GetFilesAndDirectories(ViewModelSecondDatagrid);
+                GetFilesAndDirectories(ViewModelSecondDatagrid, IsRecursiveScan);
             }
         }
 
@@ -213,7 +256,7 @@ namespace CompareDirectories
             if (!String.IsNullOrEmpty(this.PathFirstDir) && !String.IsNullOrEmpty(this.PathSecondDir))
             {
                 this.IOUtilities.CheckDirectoriesEquality();
-                var items = this.IOUtilities.DifferencesList;
+                //var items = this.IOUtilities.DifferencesList;
                 this.EqualDirectories = this.IOUtilities.EqualDirectories;
             }
         }

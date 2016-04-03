@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Interop;
 
@@ -38,7 +39,7 @@ namespace CompareDirectories
 
         public MainViewModel MainViewModel { get; set; }
 
-        private string FilterChosen
+        private string SelectedFilter
         {
             get;
             set;
@@ -53,6 +54,28 @@ namespace CompareDirectories
             InitializeComponent();
             this.MainViewModel = new MainViewModel();
             this.DataContext = this.MainViewModel;
+            ((CollectionViewSource)this.Resources["directoryItemsFirstDir"]).Filter += CollectionViewSource_Filter;
+            ((CollectionViewSource)this.Resources["directoryItemsSecondDir"]).Filter += CollectionViewSource_Filter;
+        }
+
+        void CollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            DataItem dataItem = e.Item as DataItem;
+            if (this.MainViewModel.SelectedFilter.Name.EndsWith("*"))
+            {
+                e.Accepted = true;
+            }
+            else
+            {
+                if (dataItem.FileExtension != null)
+                {
+                    e.Accepted = dataItem.FileExtension.Equals(this.MainViewModel.SelectedFilter.Name);
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
         }
 
         #endregion
@@ -74,7 +97,7 @@ namespace CompareDirectories
                 if ((emptyDirectoryPath) || (newDirectoryPath))
                 {
                     MainViewModel.PathFirstDir = dialog.SelectedPath;
-                    MainViewModel.GetFilesAndDirectories(MainViewModel.ViewModelFirstDatagrid);
+                    MainViewModel.GetFilesAndDirectories(MainViewModel.ViewModelFirstDatagrid, MainViewModel.IsRecursiveScan);
                 }
             }
         }
@@ -94,23 +117,20 @@ namespace CompareDirectories
                 if ((emptyDirectoryPath) || (newDirectoryPath))
                 {
                     MainViewModel.PathSecondDir = dialog.SelectedPath;
-                    MainViewModel.GetFilesAndDirectories(MainViewModel.ViewModelSecondDatagrid);
+                    MainViewModel.GetFilesAndDirectories(MainViewModel.ViewModelSecondDatagrid, MainViewModel.IsRecursiveScan);
                 }
             }
         }
 
         private void fileFilterDropDown_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Filter itemSelected = (Filter)fileFilterDropDown.SelectedItem;
-            FilterChosen = itemSelected.Name;
-            if (folder1TextBox.Text.Length != 0)
+            if (folder1TextBox.Text.Length != 0 )
             {
-                firstDataGrid.Items.Refresh();
+                ((CollectionViewSource)this.Resources["directoryItemsFirstDir"]).View.Refresh();
             }
             if (folder2TextBox.Text.Length != 0)
             {
-                //worker2.RunWorkerAsync(folder1TextBox.Text);
-                secondDataGrid.Items.Refresh();
+                ((CollectionViewSource)this.Resources["directoryItemsSecondDir"]).View.Refresh();
             }
         }
 
@@ -196,31 +216,31 @@ namespace CompareDirectories
         private void secondDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
 
-            if (folder1TextBox.Text.Length != 0)
-            {
-                DataItem rowDataContext = e.Row.DataContext as DataItem;
+            //if (folder1TextBox.Text.Length != 0)
+            //{
+            //    DataItem rowDataContext = e.Row.DataContext as DataItem;
 
-                if (rowDataContext != null)
-                {
+            //    if (rowDataContext != null)
+            //    {
 
-                    string rowItemName = rowDataContext.ItemName;
+            //        string rowItemName = rowDataContext.ItemName;
 
-                    //if (listDiff != null)
-                    //{
-                    //    foreach (var element in listDiff)
-                    //    {
-                    //        if (rowItemName.Equals(element.ItemName))
-                    //        {
-                    //            e.Row.Foreground = new SolidColorBrush(Colors.White);
-                    //            e.Row.Background = new SolidColorBrush(Colors.DarkRed);
+            //        //if (listDiff != null)
+            //        //{
+            //        //    foreach (var element in listDiff)
+            //        //    {
+            //        //        if (rowItemName.Equals(element.ItemName))
+            //        //        {
+            //        //            e.Row.Foreground = new SolidColorBrush(Colors.White);
+            //        //            e.Row.Background = new SolidColorBrush(Colors.DarkRed);
 
-                    //        }
+            //        //        }
 
-                    //    }
-                    //}
+            //        //    }
+            //        //}
 
-                }
-            }
+            //    }
+            //}
         }
 
 
@@ -228,29 +248,29 @@ namespace CompareDirectories
         private void firstDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
 
-            if (folder2TextBox.Text.Length != 0)
-            {
-                DataGridRow item = e.Row;
-                var c = item.DataContext as DataItem;
+            //if (folder2TextBox.Text.Length != 0)
+            //{
+            //    DataGridRow item = e.Row;
+            //    var c = item.DataContext as DataItem;
 
-                if (c != null)
-                {
-                    string row = c.ItemName;
+            //    if (c != null)
+            //    {
+            //        string row = c.ItemName;
 
 
-                    //if (listDiff != null)
-                    //{
-                    //    foreach (var element in listDiff)
-                    //    {
-                    //        if (row == element.ItemName)
-                    //        {
-                    //            e.Row.Foreground = new SolidColorBrush(Colors.White);
-                    //            e.Row.Background = new SolidColorBrush(Colors.DarkRed);
-                    //        }
-                    //    }
-                    //}
-                }
-            }
+            //        //if (listDiff != null)
+            //        //{
+            //        //    foreach (var element in listDiff)
+            //        //    {
+            //        //        if (row == element.ItemName)
+            //        //        {
+            //        //            e.Row.Foreground = new SolidColorBrush(Colors.White);
+            //        //            e.Row.Background = new SolidColorBrush(Colors.DarkRed);
+            //        //        }
+            //        //    }
+            //        //}
+            //    }
+            //}
         }
 
         #endregion

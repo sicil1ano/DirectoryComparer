@@ -21,7 +21,7 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the number of subdirectories found.
         /// </summary>
-        int SubDirectoriesNumber { get; set; }
+        int DirectoriesNumber { get; set; }
 
         /// <summary>
         /// Gets/Sets the list of items existing in the directory selected.

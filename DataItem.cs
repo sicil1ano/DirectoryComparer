@@ -9,12 +9,12 @@ namespace CompareDirectories
     {
         #region Fields
 
-        private string _itemName;
-        private bool _isSubFolder;
-        private DateTime _itemCreatedDate;
-        private DateTime _itemModifiedDate;
-        private string _itemPath;
-        private string _itemFileExtension;
+        private string itemName;
+        private bool isFolder;
+        private DateTime itemCreatedDate;
+        private DateTime itemModifiedDate;
+        private string itemPath;
+        private string itemFileExtension;
 
         #endregion
 
@@ -23,17 +23,17 @@ namespace CompareDirectories
         /// <summary>
         /// True if the directory selected is a sub folder.
         /// </summary>
-        public bool IsSubFolder
+        public bool IsFolder
         {
             get
             {
-                return _isSubFolder;
+                return isFolder;
             }
             set
             {
-                if (value != _isSubFolder)
+                if (value != isFolder)
                 {
-                    _isSubFolder = value;
+                    isFolder = value;
                     RaisePropertyChanged("IsSubFolder");
                 }
             }
@@ -42,19 +42,19 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the name of the file/directory selected.
         /// </summary>
-        public string ItemName
+        public string Name
         {
             get
             {
-                return _itemName;
+                return itemName;
             }
 
             set
             {
                 if (value != null)
                 {
-                    _itemName = value;
-                    RaisePropertyChanged("ItemName");
+                    itemName = value;
+                    RaisePropertyChanged("Name");
                 }
             }
         }
@@ -62,18 +62,18 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the path of the file/directory selected.
         /// </summary>
-        public string ItemPath
+        public string Path
         {
             get
             {
-                return _itemPath;
+                return itemPath;
             }
             set
             {
                 if (value != null)
                 {
-                    _itemPath = value;
-                    RaisePropertyChanged("ItemPath");
+                    itemPath = value;
+                    RaisePropertyChanged("Path");
                 }
             }
         }
@@ -81,19 +81,19 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the creation date of the selected file/directory.
         /// </summary>
-        public DateTime ItemCreatedDate
+        public DateTime CreatedDate
         {
             get
             {
-                return _itemCreatedDate;
+                return itemCreatedDate;
             }
 
             set
             {
                 if (value != null)
                 {
-                    _itemCreatedDate = value;
-                    RaisePropertyChanged("ItemCreatedDate");
+                    itemCreatedDate = value;
+                    RaisePropertyChanged("CreatedDate");
                 }
             }
         }
@@ -101,19 +101,19 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the modification date of the selected file/directory.
         /// </summary>
-        public DateTime ItemModifiedDate
+        public DateTime ModifiedDate
         {
             get
             {
-                return _itemModifiedDate;
+                return itemModifiedDate;
             }
 
             set
             {
                 if (value != null)
                 {
-                    _itemModifiedDate = value;
-                    RaisePropertyChanged("ItemModifiedDate");
+                    itemModifiedDate = value;
+                    RaisePropertyChanged("ModifiedDate");
                 }
             }
         }
@@ -121,18 +121,18 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the file extension of the selected file.
         /// </summary>
-        public string ItemFileExtension 
+        public string FileExtension 
         {
             get
             {
-                return _itemFileExtension;
+                return itemFileExtension;
             }
             set
             {
                 if (value != null)
                 {
-                    _itemFileExtension = value;
-                    RaisePropertyChanged("ItemFileExtension");
+                    itemFileExtension = value;
+                    RaisePropertyChanged("FileExtension");
                 }
             }
         
@@ -153,7 +153,7 @@ namespace CompareDirectories
 
             if (Object.ReferenceEquals(this, otherItem)) return true;
 
-            return ItemName.Equals(otherItem.ItemName) && ItemPath.Equals(otherItem.ItemPath) && ItemCreatedDate.Equals(otherItem.ItemCreatedDate) && ItemModifiedDate.Equals(otherItem.ItemModifiedDate);
+            return Name.Equals(otherItem.Name) && Path.Equals(otherItem.Path) && CreatedDate.Equals(otherItem.CreatedDate) && ModifiedDate.Equals(otherItem.ModifiedDate);
         }
 
         /// <summary>
@@ -162,13 +162,13 @@ namespace CompareDirectories
         /// <returns></returns>
         public override int GetHashCode()
         {
-            int hashInfoElementName = ItemName == null ? 0 : ItemName.GetHashCode();
+            int hashInfoElementName = Name == null ? 0 : Name.GetHashCode();
 
-            int hashInfoElementPath = ItemPath == null ? 0 : ItemPath.GetHashCode();
+            int hashInfoElementPath = Path == null ? 0 : Path.GetHashCode();
 
-            int hashInfoElementCreatedDate = ItemCreatedDate == null ? 0 : ItemCreatedDate.GetHashCode();
+            int hashInfoElementCreatedDate = CreatedDate == null ? 0 : CreatedDate.GetHashCode();
 
-            int hashInfoElementeModifiedDate = ItemModifiedDate == null ? 0 : ItemModifiedDate.GetHashCode();
+            int hashInfoElementeModifiedDate = ModifiedDate == null ? 0 : ModifiedDate.GetHashCode();
 
             return hashInfoElementName ^ hashInfoElementPath ^ hashInfoElementCreatedDate ^ hashInfoElementeModifiedDate;
         }

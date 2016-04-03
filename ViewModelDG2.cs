@@ -10,10 +10,10 @@ namespace CompareDirectories
     {
         #region Fields
         
-        private int _filesNumber;
-        private int _subDirectoriesNumber;
-        private ObservableCollection<DataItem> _directoryItems;
-        private string _selectedDirectory;
+        private int filesNumber;
+        private int directoriesNumber;
+        private ObservableCollection<DataItem> directoryItems;
+        private string selectedDirectory;
 
         #endregion
 
@@ -26,13 +26,13 @@ namespace CompareDirectories
         {
             get
             {
-                return this._filesNumber;
+                return this.filesNumber;
             }
             set
             {
-                if (value != this._filesNumber)
+                if (value != this.filesNumber)
                 {
-                    this._filesNumber = value;
+                    this.filesNumber = value;
                     RaisePropertyChanged("FilesNumber");
                 }
             }
@@ -41,18 +41,18 @@ namespace CompareDirectories
         /// <summary>
         /// Gets/Sets the number of subdirectories found.
         /// </summary>
-        public int SubDirectoriesNumber
+        public int DirectoriesNumber
         {
             get
             {
-                return this._subDirectoriesNumber;
+                return this.directoriesNumber;
             }
             set
             {
-                if (value != this._subDirectoriesNumber)
+                if (value != this.directoriesNumber)
                 {
-                    this._subDirectoriesNumber = value;
-                    RaisePropertyChanged("SubDirectoriesNumber");
+                    this.directoriesNumber = value;
+                    RaisePropertyChanged("DirectoriesNumber");
                 }
             }
         
@@ -65,13 +65,13 @@ namespace CompareDirectories
         {
             get
             {
-                return this._selectedDirectory;
+                return this.selectedDirectory;
             }
             set
             {
-                if (value != this._selectedDirectory)
+                if (value != this.selectedDirectory)
                 {
-                    this._selectedDirectory = value;
+                    this.selectedDirectory = value;
                     RaisePropertyChanged("SelectedDirectory");
                 }
             }
@@ -84,13 +84,13 @@ namespace CompareDirectories
         {
             get
             {
-                return this._directoryItems;
+                return this.directoryItems;
             }
             set
             {
                 if (value != null)
                 {
-                    this._directoryItems = value;
+                    this.directoryItems = value;
                     RaisePropertyChanged("DirectoryItems");
                 }
             }

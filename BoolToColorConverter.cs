@@ -10,7 +10,7 @@ namespace CompareDirectories
     /// <summary>
     /// It converts the boolean result of the equality check of the contents of directories in a color.
     /// </summary>
-    public class BoolToResultConverter : IValueConverter
+    public class BoolToColorConverter : IValueConverter
     {
         #region IValueConverterMembers
 

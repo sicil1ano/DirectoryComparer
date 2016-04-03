@@ -14,9 +14,9 @@ namespace CompareDirectories
         /// <summary>
         /// ObservableCollection of files and directories found during the search.
         /// </summary>
-        private ObservableCollection<DataItem> _filesAndDirectoriesList;
+        private ObservableCollection<DataItem> filesAndDirectoriesList;
 
-        private List<DataItem> _differencesList;
+        private List<DataItem> differencesList;
 
         #endregion
 
@@ -34,7 +34,7 @@ namespace CompareDirectories
         {
             get
             {
-                return this._differencesList;
+                return this.differencesList;
             }
         }
 
@@ -79,60 +79,72 @@ namespace CompareDirectories
         /// Gets the list of files and directories for the path selected.
         /// </summary>
         /// <param name="directoryPath">Path of directory used to get files and directories.</param>
-        private void SearchFilesAndDirectories(string directoryPath)
+        private void SearchFilesAndDirectories(string directoryPath, bool isRecursiveSearch)
         {
             ObservableCollection<DataItem> tempDirectoryItems = new ObservableCollection<DataItem>();
             int tempFilesNumber = 0;
             int tempSubDirNumber = 0;
             DirectoryInfo dirInfo = new DirectoryInfo(directoryPath);
+            IEnumerable<FileInfo> files;
+            IEnumerable<DirectoryInfo> directories;
 
-            var files = dirInfo.EnumerateFiles();
-            tempFilesNumber = files.Count();
+            if (isRecursiveSearch)
+            {
+                files = dirInfo.EnumerateFiles("*.*", SearchOption.AllDirectories);
+                directories = dirInfo.EnumerateDirectories("*.*", SearchOption.AllDirectories);
+            }
+            else
+            {
+                files = dirInfo.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly);
+                directories = dirInfo.EnumerateDirectories("*.*", SearchOption.TopDirectoryOnly);
+            }
 
+            tempSubDirNumber = directories.Where(x => x.FullName.Length < 260).Count();
+            tempFilesNumber = files.Where(x => x.Name.Length < 260).Count();
 
             foreach (var file in files)
             {
-                if (file != null)
+                try
                 {
                     tempDirectoryItems.Add(new DataItem()
                     {
-                        IsSubFolder = false,
-                        ItemName = file.Name,
-                        ItemPath = file.FullName,
-                        ItemFileExtension = file.Extension,
-                        ItemCreatedDate = file.CreationTimeUtc,
-                        ItemModifiedDate = file.LastWriteTimeUtc
+                        IsFolder = false,
+                        Name = file.Name,
+                        Path = file.FullName,
+                        FileExtension = String.Concat("*",file.Extension),
+                        CreatedDate = file.CreationTimeUtc,
+                        ModifiedDate = file.LastWriteTimeUtc
                     });
                 }
+                catch (PathTooLongException)
+                {
+                    continue;
+                }
             }
-
-            var directories = dirInfo.EnumerateDirectories();
-            tempSubDirNumber = directories.Count();
-            UpdateTempVariables(tempDirectoryItems, tempFilesNumber, tempSubDirNumber);
 
             foreach (var directory in directories)
             {
-                tempDirectoryItems.Clear();
-                if (directory != null)
+                try
                 {
                     tempDirectoryItems.Add(new DataItem()
                     {
-                        IsSubFolder = true,
-                        ItemName = directory.Name,
-                        ItemPath = directory.FullName,
-                        ItemFileExtension = null,
-                        ItemCreatedDate = directory.CreationTimeUtc,
-                        ItemModifiedDate = directory.LastWriteTimeUtc
+                        IsFolder = true,
+                        Name = directory.Name,
+                        Path = directory.FullName,
+                        FileExtension = null,
+                        CreatedDate = directory.CreationTimeUtc,
+                        ModifiedDate = directory.LastWriteTimeUtc
                     });
-
-                    UpdateTempVariables(tempDirectoryItems);
-
-                    if (this.MainViewModel.RecursiveScanEnabled)
-                    {
-                        SearchFilesAndDirectories(directory.FullName);
-                    }
                 }
+                catch (PathTooLongException)
+                {
+                    continue;
+                }
+
+                //UpdateTempVariables(tempDirectoryItems);
             }
+
+            UpdateTempVariables(tempDirectoryItems, tempFilesNumber, tempSubDirNumber);
         }
 
         /// <summary>
@@ -147,8 +159,8 @@ namespace CompareDirectories
 
             if (itemsFirstPath != null && itemsSecondPath != null)
             {
-                this._differencesList = itemsFirstPath.Where(x => !itemsSecondPath.Any(x1 => x1.ItemName == x.ItemName))
-                     .Union(itemsSecondPath.Where(x => !itemsFirstPath.Any(x1 => x1.ItemName == x.ItemName))).ToList<CompareDirectories.DataItem>();
+                this.differencesList = itemsFirstPath.Where(x => !itemsSecondPath.Any(x1 => x1.Name == x.Name))
+                     .Union(itemsSecondPath.Where(x => !itemsFirstPath.Any(x1 => x1.Name == x.Name))).ToList<CompareDirectories.DataItem>();
 
 
                 this.EqualDirectories = DirectoriesAreEquals();
@@ -162,7 +174,7 @@ namespace CompareDirectories
         private bool DirectoriesAreEquals()
         {
             bool sameNumberOfFiles = this.MainViewModel.ViewModelFirstDatagrid.FilesNumber == this.MainViewModel.ViewModelSecondDatagrid.FilesNumber;
-            bool sameNumberofSubDirectories = this.MainViewModel.ViewModelFirstDatagrid.SubDirectoriesNumber == this.MainViewModel.ViewModelSecondDatagrid.SubDirectoriesNumber;
+            bool sameNumberofSubDirectories = this.MainViewModel.ViewModelFirstDatagrid.DirectoriesNumber == this.MainViewModel.ViewModelSecondDatagrid.DirectoriesNumber;
 
             if (sameNumberOfFiles && sameNumberofSubDirectories && DifferencesList.Count == 0)
             {
@@ -179,7 +191,7 @@ namespace CompareDirectories
         /// </summary>
         private void ClearParameters()
         {
-            this._filesAndDirectoriesList = new ObservableCollection<DataItem>();
+            this.filesAndDirectoriesList = new ObservableCollection<DataItem>();
             this.filesFoundNumber = 0;
             this.subDirectoriesFoundNumber = 0;
         }
@@ -192,9 +204,12 @@ namespace CompareDirectories
         /// <param name="subDirectoriesNumber">The temporary number of subdirectories found by the search algorithm.</param>
         private void UpdateTempVariables(ObservableCollection<DataItem> directoryItems, int filesNumber = 0, int subDirectoriesNumber = 0)
         {
-            this._filesAndDirectoriesList.AddRange(directoryItems);
-            this.filesFoundNumber += filesNumber;
-            this.subDirectoriesFoundNumber += subDirectoriesNumber;
+            //this.filesAndDirectoriesList.AddRange(directoryItems);
+            this.filesAndDirectoriesList = directoryItems;
+            //this.filesFoundNumber += filesNumber;
+            //this.subDirectoriesFoundNumber += subDirectoriesNumber;
+            this.filesFoundNumber = filesNumber;
+            this.subDirectoriesFoundNumber = subDirectoriesNumber;
         }
 
         /// <summary>
@@ -204,17 +219,17 @@ namespace CompareDirectories
         /// <param name="filesNumber">The number of files found in the given directory.</param>
         /// <param name="subDirectoriesNumber">The number of subdirectories found in the given directory.</param>
         /// <returns></returns>
-        public ObservableCollection<DataItem> GetDirectoryElements(string directoryPath, out int filesNumber, out int subDirectoriesNumber)
+        public ObservableCollection<DataItem> GetDirectoryElements(string directoryPath, bool isRecursiveSearch, out int filesNumber, out int subDirectoriesNumber)
         {
             ClearParameters();
             if (!String.IsNullOrEmpty(directoryPath))
             {
-                SearchFilesAndDirectories(directoryPath);
+                SearchFilesAndDirectories(directoryPath, isRecursiveSearch);
             }
             filesNumber = filesFoundNumber;
             subDirectoriesNumber = subDirectoriesFoundNumber;
 
-            return this._filesAndDirectoriesList;
+            return this.filesAndDirectoriesList;
         }
 
         /// <summary>
@@ -222,7 +237,7 @@ namespace CompareDirectories
         /// </summary>
         public void CheckDirectoriesEquality()
         {
-            this._differencesList = new List<DataItem>();
+            this.differencesList = new List<DataItem>();
             GetDifferencesList();
         }
 

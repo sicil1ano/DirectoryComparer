@@ -56,9 +56,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BoolToResultConverter.cs" />
+    <Compile Include="BoolToColorConverter.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="Filter.cs" />
+    <Compile Include="FilterViewModel.cs" />
     <Compile Include="IOUtilities.cs" />
     <Compile Include="IViewModelDG.cs" />
     <Compile Include="MainViewModel.cs" />
